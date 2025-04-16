@@ -1,0 +1,20 @@
+   .product-card-bottom {
+      display: flex;
+      justify-content: space-between;
+      .product-price {
+        padding-bottom: 10px;
+        font-family: "Quicksand", sans-serif;
+        span {
+          font-size: 18px;
+          font-weight: bold;
+          color: #3bb77e;
+        }
+        .old-price {
+          font-size: 14px;
+          color: #adadad;
+          margin: 0 0 0 7px;
+          text-decoration: line-through;
+          font-weight: bold;
+        }
+      }
+    }

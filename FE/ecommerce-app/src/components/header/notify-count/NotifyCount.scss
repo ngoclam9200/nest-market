@@ -1,0 +1,26 @@
+ .list-inline-item-icon {
+      position: relative;
+      .count {
+        position: absolute;
+        left: 5px;
+        top: -13px;
+        color: #ffffff;
+        height: 20px;
+        width: 20px;
+        border-radius: 100%;
+        font-weight: 500;
+        font-size: 11px;
+        text-align: center;
+        line-height: 20px;
+        background-color: #3bb77e;
+      }
+      span {
+        font-size: 15px;
+        margin: 5px 0 0 10px;
+        color: #7e7e7e;
+      }
+      img {
+        max-width: 25px;
+        height: 25px;
+      }
+    }

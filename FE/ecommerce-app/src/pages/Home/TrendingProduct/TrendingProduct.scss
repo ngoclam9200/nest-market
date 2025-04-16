@@ -1,0 +1,23 @@
+.product-list-small article:not(:last-child) {
+  margin-bottom: 20px;
+}
+
+.trending-list {
+  margin-top: 20px;
+  .section-title.style-1 {
+    position: relative;
+    border-bottom: 1px solid #ececec;
+    padding-bottom: 20px;
+    font-size: 24px;
+  }
+
+  .section-title.style-1::after {
+    content: "";
+    width: 80px;
+    height: 2px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    background-color: #bce3c9;
+  }
+}

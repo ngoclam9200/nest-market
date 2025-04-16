@@ -1,0 +1,25 @@
+form {
+  background-color: #fff;
+  max-width: 450px;
+  border-radius: 50px;
+  input {
+    border: 0;
+    border-radius: 50px 0 0 50px;
+    padding-left: 58px;
+    background: url(../../../assets/images/icon-plane.png) no-repeat 25px center;
+    height: 64px;
+    box-shadow: none;
+    width: 100%;
+    font-size: 16px;
+    outline: none;
+  }
+  button {
+    border: 0;
+    border-radius: 50px !important;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 15px 40px;
+    color: #ffffff;
+    background-color: #3bb77e;
+  }
+}

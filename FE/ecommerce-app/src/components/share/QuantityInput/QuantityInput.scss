@@ -1,0 +1,45 @@
+  .detail-qty {
+      margin: 0 6px 15px 0;
+      background: #fff;
+      border: 2px solid #3bb77e !important;
+      font-size: 16px;
+      font-weight: 700;
+      color: #3bb77e;
+      border-radius: 5px;
+      padding: 11px 20px 11px 30px;
+
+      max-width: 90px;
+      position: relative;
+      a {
+        font-size: 16px;
+        position: absolute;
+        right: 8px;
+        color: #3bb77e;
+      }
+      .qty-down {
+        bottom: -4px;
+        svg {
+          font-size: 1.2rem;
+        }
+      }
+      .qty-up {
+        top: 0;
+        svg {
+          font-size: 1.2rem;
+        }
+      }
+      .qty-up,
+      .qt-down {
+        font-size: 16px;
+        position: absolute;
+        right: 8px;
+        color: #3bb77e;
+      }
+      .qty-val {
+        border: 0;
+        border-radius: 0;
+        height: unset;
+        padding: 0 !important;
+        outline: none;
+      }
+    }

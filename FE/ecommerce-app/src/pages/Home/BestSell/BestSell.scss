@@ -1,0 +1,50 @@
+.title-best-sell {
+  margin-bottom: 30px;
+}
+.row {
+  .col-lg-3 {
+    .best-sell-banner-img {
+      position: relative;
+      clear: both;
+      border-radius: 10px;
+      overflow: hidden;
+      border-radius: 15px;
+      overflow: hidden;
+      height: 520px;
+      background: url(../../../assets/images/banner-4.png) no-repeat center
+        bottom;
+      background-size: cover;
+      width: 100%;
+      .banner-text {
+        top: 50px;
+        transform: none;
+        position: absolute;
+        top: 50%;
+        z-index: 2;
+        transform: translateY(-50%);
+        padding: 0 50px;
+        h2 {
+          line-height: 1.2;
+        }
+        a {
+          padding: 7px 8px 7px 12px;
+          font-size: 12px;
+          text-transform: none;
+          display: inline-flex;
+          flex-wrap: wrap;
+          line-height: 1.3;
+          svg {
+            margin-left: 5px;
+            font-size: 1rem;
+          }
+        }
+      }
+    }
+  }
+  .col-lg-9 {
+    position: relative;
+    .slick-slide {
+      padding: 0 10px;
+    }
+  }
+}

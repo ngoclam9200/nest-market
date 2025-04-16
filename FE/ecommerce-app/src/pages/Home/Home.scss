@@ -1,0 +1,20 @@
+@media only screen and (min-width: 1200px) {
+  .col-lg-1-5 {
+    width: 20% !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .col-md-4 {
+    flex: 0 0 auto;
+    width: 33.33333333%;
+  }
+}
+@media (min-width: 576px) {
+  .col-sm-6 {
+    flex: 0 0 auto;
+    width: 50%;
+  }
+}
+ 
+

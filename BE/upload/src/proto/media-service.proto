@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package grpc.media.service;
+
+service MediaServiceGrpc {
+  rpc getMedia (GetMediaRequest) returns (MediaResponse);
+  rpc getMediasByIds (GetMediasByIdsRequest) returns (MediasByIdsResponse);
+}
+
+message GetMediaRequest{
+  int32 media_id=1;
+}
+
+message MediaResponse {
+   int32 status=1;
+   string message=2;
+   Media data = 3;
+}
+
+message GetMediasByIdsRequest {
+  repeated int32 media_ids = 1;
+}
+
+message MediasByIdsResponse {
+  int32 status=1;
+  string message=2;
+  repeated Media data = 3;
+}
+
+message Media {
+  int32 id  = 1;
+  string url = 2;
+  int32 size=3;
+  int32 type  = 4;
+  string created_at =5 ;
+  bool status =6;
+  optional string name = 7;
+
+}
+
+message UpdateTokenRequest{
+  int32 id  = 1;
+  string token = 2;
+}
+
+message EmptyResponse {}

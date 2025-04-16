@@ -1,0 +1,23 @@
+.add-cart {
+  cursor: pointer;
+  .add {
+    position: relative;
+    display: inline-block;
+    padding: 6px 10px 6px 10px;
+    border-radius: 4px;
+    svg {
+      font-size: 18px;
+      margin-right: 5px;
+    }
+    span {
+      font-size: 14px;
+      font-weight: 500;
+    }
+  }
+  .add:hover {
+    background-color: #3bb77e;
+    color: #fff;
+    transform: translateY(-3px);
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.05);
+  }
+}

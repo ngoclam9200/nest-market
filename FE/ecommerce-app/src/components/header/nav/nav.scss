@@ -1,0 +1,93 @@
+.row {
+  position: relative;
+}
+.nav {
+  padding: 10px 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  margin: auto;
+  border-top: 1px solid #ececec;
+  border-bottom: 1px solid #ececec;
+  font-family: "Quicksand", sans-serif;
+  .catTab {
+    padding: 10px 20px !important;
+    font-size: 15px;
+    text-transform: capitalize;
+    font-family: 600;
+  }
+  .list-inline {
+    .list-inline-item {
+      position: relative;
+      button {
+        text-transform: capitalize;
+        font-family: "Quicksand", sans-serif;
+        font-size: 15px;
+        font-weight: 700;
+        a {
+          color: #253d4e;
+          font-size: 15px;
+          font-weight: 700;
+        }
+        svg {
+          margin-left: 5px;
+          color: #253d4e;
+          font-size: 12px;
+        }
+        
+        a:hover {
+          color: #3bb77e;
+        }
+      }
+      button:hover {
+        background-color: unset;
+        svg {
+          color: #3bb77e;
+        }
+      }
+    }
+  }
+  .hotline {
+    svg {
+      font-size: 40px;
+    }
+    p {
+      .phone-number {
+        color: #3bb77e !important;
+        font-size: 26px;
+        font-weight: 700;
+      }
+      .text-support {
+        font-weight: 500;
+        font-size: 12px;
+        font-family: "Lato", sans-serif;
+        color: #7e7e7e;
+        letter-spacing: 0.9px;
+        display: block;
+      }
+    }
+  }
+}
+.stick-nav {
+    animation: 700ms ease-in-out 0s normal none 1 running fadeInDown;
+    box-shadow: 0 8px 20px 0 rgba(0, 0, 0, 0.05);
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 999;
+    left: 0;
+    transition: all 0.3s ease 0s;
+    background: #fff;
+    padding: 20px 0;
+}
+
+@media only screen and (max-width: 1220px) {
+   .nav-container {
+    padding: 20px 0;
+   }
+}
+@media (max-width: 992px) {
+  .nav-container {
+    display: none !important;
+  }
+}

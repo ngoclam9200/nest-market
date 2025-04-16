@@ -1,0 +1,30 @@
+.table-responsive {
+  .table-compare {
+    border-radius: 15px;
+    .text-muted {
+      color: #b6b6b6 !important;
+      font-size: 14px;
+    }
+    .stock-status {
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      font-family: "Quicksand", sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .stock-status.in-stock {
+      background: #def9ec;
+      color: #3bb77e;
+    }
+    .stock-status.out-stock {
+      color: #f74b81;
+      background: #fde0e9;
+    }
+  }
+}
+.table.table-compare > :not(caption) > * > * {
+  padding: 30px 0;
+}

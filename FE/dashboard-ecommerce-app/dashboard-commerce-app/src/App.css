@@ -1,0 +1,20 @@
+#root {
+  width: 100%;
+}
+.pagination-button {
+  button {
+    color: black !important;
+
+  }
+   ul{
+    padding: 10px 0;
+    justify-content: end;
+  }
+}
+.form-check{
+  input{
+    min-width: 0 !important;
+    height: 20px !important;
+  }
+ 
+}
