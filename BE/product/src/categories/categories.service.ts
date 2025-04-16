@@ -447,7 +447,7 @@ export class CategoriesService {
       }
       category.user_id_updated = currentUser.id;
       Object.assign(category, updateCategoryDto);
-      this.categoryRepository.save(category);
+      await this.categoryRepository.save(category);
       let user_created: ApiResponse<UserResponse> = await lastValueFrom(
         this.userServiceGrpc.getUser({ id: category.user_id_created }),
       );
@@ -480,7 +480,7 @@ export class CategoriesService {
       });
       if (!category) throw new NotFoundException('Danh mục không tồn tại');
       category.user_id_updated = currentUser.id;
-      this.categoryRepository.save(category);
+      await this.categoryRepository.save(category);
       return createResponse(HttpStatus.OK, 'OK', null);
     } catch (error) {
       throw new HttpException(error, HttpStatus.BAD_REQUEST);
@@ -498,7 +498,7 @@ export class CategoriesService {
 
     category.status = status;
 
-    this.categoryRepository.save(category); // Lưu vào database
+    await this.categoryRepository.save(category); // Lưu vào database
     const exsistParentCategory = await this.categoryRepository.findOne({
       where: { id: category.parent_id },
     });

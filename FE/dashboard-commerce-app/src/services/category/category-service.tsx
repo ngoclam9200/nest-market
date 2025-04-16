@@ -1,120 +1,111 @@
-import { getData, postData } from "../api-service";
-import { ApiUrlCategoryEnum, getUrlWithEndPoint } from "../../enums/ApiEnum";
-import { IDataArray, IHttpResponse } from "../../interface/IHttpResponse";
-import { ICategory } from "../../interface/ICategory";
+import { useFetchData } from "../../hooks/useFetch";
+import { CategoryResponse } from "../../response/category";
+import { DataArray } from "../../response/http-response";
+import { ApiConfig } from "../api-config";
+import { API_CATEGORY_URL } from "../api-endpoint";
 
-const domain =
-  import.meta.env.VITE_API_DOMAIN + import.meta.env.VITE_API_PRODUCT_PORT + import.meta.env.VITE_API_PREFIX;
-
-export const getListParentCategory = async (param: any): Promise<IHttpResponse<ICategory[]>> => {
-  try {
-    const response = await getData(domain + ApiUrlCategoryEnum.GET_PARENT_CATEGORY, param);
-    return response;
-  } catch (error) {
-    console.error("Error logging in:", error);
-    throw error;
-  }
-};
-
-export const getListChildCategory = async (param: any): Promise<IHttpResponse<IDataArray<ICategory>>> => {
-  try {
-    const response = await getData(domain + ApiUrlCategoryEnum.GET_CHILD_CATEGORY, param);
-    return response;
-  } catch (error) {
-    console.error("Error logging in:", error);
-    throw error;
-  }
-};
-
-export const getAllChildCategory = async (param: any): Promise<IHttpResponse<ICategory[]>> => {
-  try {
-    const response = await getData(domain + ApiUrlCategoryEnum.GET_ALL_CHILD_CATEGORY, param);
-    return response;
-  } catch (error) {
-    console.error("Error logging in:", error);
-    throw error;
-  }
-};
-
-export const getCategoryWithCode = async (code: string): Promise<IHttpResponse<ICategory>> => {
-  try {
-    const response = await getData(
-      // getUrlWithEndPoint(
-      domain + ApiUrlCategoryEnum.GET_CATEGORY_WITH_CODE + code
-      // )
-    );
-    return response;
-  } catch (error) {
-    console.error("Error logging in:", error);
-    throw error;
-  }
-};
-
-export const createCategory = async (
-  name: string,
-  description: string,
-  parent_id: number | null,
-  branch_id: number,
-  media_id: number
-): Promise<IHttpResponse<any>> => {
-  try {
-    const response = await postData<{
-      name: string;
-      description: string;
-      parent_id?: number | null;
-      branch_id: number;
-      media_id: number;
-    }>(domain + ApiUrlCategoryEnum.CREATE_CATEGORY, {
-      name,
-      description,
-      parent_id,
-      media_id,
-      branch_id,
+export const CategoryService = {
+  getListParentCategory: () => {
+    const { request, baseResponse, loading } = useFetchData.Get<CategoryResponse[]>({
+      projectId: ApiConfig.PROJECT_ID.PRODUCT_SERVICE,
     });
-    return response;
-  } catch (error) {
-    console.error("Error logging in:", error);
-    throw error;
-  }
-};
-export const updateCategory = async (
-  id: number,
-  name: string,
-  description: string,
-  branch_id: number,
-  media_id: number
-): Promise<IHttpResponse<any>> => {
-  try {
-    const response = await postData<{
-      id: number;
-      name: string;
-      description: string;
-      branch_id: number;
-      media_id: number;
-    }>(domain + ApiUrlCategoryEnum.UPDATE_CATEGORY, {
-      id,
-      name,
-      description,
-      branch_id,
-      media_id,
-    });
-    return response;
-  } catch (error) {
-    console.error("Error logging in:", error);
-    throw error;
-  }
-};
+    return {
+      fetch: (params: { status: number; branch_id: number }) =>
+        request({
+          endPoint: API_CATEGORY_URL.GET_PARENT_CATEGORY,
+          data: params,
+        }),
+      response: baseResponse,
+      loading: loading,
+    };
+  },
 
-export const changeStatusCategory = async (id: number, status: number): Promise<IHttpResponse<any>> => {
-  try {
-    const response = await postData<{
-      status: number;
-    }>(domain + getUrlWithEndPoint("categories/" + id, "/change-status"), {
-      status,
+  getListChildCategory: () => {
+    const { request, baseResponse, loading } = useFetchData.Get<DataArray<CategoryResponse>>({
+      projectId: ApiConfig.PROJECT_ID.PRODUCT_SERVICE,
     });
-    return response;
-  } catch (error) {
-    console.error("Error logging in:", error);
-    throw error;
-  }
+    return {
+      fetch: (params : {  branch_id: number; page: number; limit: number }) =>
+        request({
+          endPoint: API_CATEGORY_URL.GET_CHILD_CATEGORY,
+          data: params,
+        }),
+      response: baseResponse,
+      loading: loading,
+    };
+  },
+
+  getAllChildCategory: () => {
+    const { request, baseResponse, loading } = useFetchData.Get<CategoryResponse[]>({
+      projectId: ApiConfig.PROJECT_ID.PRODUCT_SERVICE,
+    });
+    return {
+      fetch: ( ) =>
+        request({
+          endPoint: API_CATEGORY_URL.GET_ALL_CHILD_CATEGORY,
+          // params: params,
+        }),
+      response: baseResponse,
+      loading: loading,
+    };
+  },
+
+  getCategoryWithCode: () => {
+    const { request, baseResponse, loading } = useFetchData.Get<CategoryResponse>({
+      projectId: ApiConfig.PROJECT_ID.PRODUCT_SERVICE,
+    });
+    return {
+      fetch: (code: string) =>
+        request({
+          endPoint: API_CATEGORY_URL.GET_CATEGORY_WITH_CODE + code,
+        }),
+      response: baseResponse,
+      loading: loading,
+    };
+  },
+
+  createCategory: () => {
+    const { request, baseResponse, loading } = useFetchData.Post<any>({
+      projectId: ApiConfig.PROJECT_ID.PRODUCT_SERVICE,
+    });
+    return {
+      fetch: (data: { name: string; description: string; parent_id?: number | null; branch_id: number; media_id: number }) =>
+        request({
+          endPoint: API_CATEGORY_URL.CREATE_CATEGORY,
+          data: data,
+        }),
+      response: baseResponse,
+      loading: loading,
+    };
+  },
+
+  updateCategory: () => {
+    const { request, baseResponse, loading } = useFetchData.Post<any>({
+      projectId: ApiConfig.PROJECT_ID.PRODUCT_SERVICE,
+    });
+    return {
+      fetch: (data: { id: number; name: string; description: string; branch_id: number; media_id: number }) =>
+        request({
+          endPoint: API_CATEGORY_URL.UPDATE_CATEGORY,
+          data: data,
+        }),
+      response: baseResponse,
+      loading: loading,
+    };
+  },
+
+  changeStatusCategory: () => {
+    const { request, baseResponse, loading } = useFetchData.Post<any>({
+      projectId: ApiConfig.PROJECT_ID.PRODUCT_SERVICE,
+    });
+    return {
+      fetch: (data: { id: number; status: number }) =>
+        request({
+          endPoint: API_CATEGORY_URL.CHANGE_STATUS_CATEGORY(),
+          data: data,
+        }),
+      response: baseResponse,
+      loading: loading,
+    };
+  },
 };

@@ -9,10 +9,11 @@ import {
   grpcUserClientOptions,
 } from 'src/grpc/grpc-client.options';
 import { ProductPriceEntity } from './entities/product-price.entity';
+import { CategoryEntity } from 'src/categories/entities/category.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ProductEntity, ProductPriceEntity]),
+    TypeOrmModule.forFeature([ProductEntity, ProductPriceEntity, CategoryEntity]),
     ClientsModule.register([
       {
         name: 'USER_PACKAGE',

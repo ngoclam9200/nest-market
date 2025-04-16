@@ -34,6 +34,7 @@ import { GetTypeEnum } from 'src/utils/common/value.enum';
 import { MediaResponse } from 'src/utils/response/media.response';
 import { MediaServiceGrpcClient } from 'src/utils/interface/media-service.interface';
 import { ProductPriceEntity } from './entities/product-price.entity';
+import { CategoryEntity } from 'src/categories/entities/category.entity';
 
 @Injectable()
 export class ProductService {
@@ -42,6 +43,8 @@ export class ProductService {
   constructor(
     @InjectRepository(ProductEntity)
     private productRepository: Repository<ProductEntity>,
+    @InjectRepository(CategoryEntity)
+    private categoryRepository: Repository<CategoryEntity>,
     @InjectRepository(ProductPriceEntity)
     private productPriceRepository: Repository<ProductPriceEntity>,
     @Inject('USER_PACKAGE') private readonly userClient: ClientGrpc,
@@ -82,6 +85,9 @@ export class ProductService {
           if (list_media.status != HttpStatus.OK) {
             throw new BadRequestException(list_media.message);
           }
+          const category = await this.categoryRepository.findOne({
+            where: { id: product.category_id },
+          });
           if (currentUser.roles.includes(Roles.ADMIN)) {
             let user_created_and_updated: ApiResponse<UserResponse[]> =
               await lastValueFrom(
@@ -95,14 +101,20 @@ export class ProductService {
             const user_updated = user_created_and_updated.data.find(
               (item) => item.id == product.user_id_updated,
             );
+
             return mapProductResponseWithAdmin(
               product,
               user_created,
               user_updated,
               list_media.data,
+              category,
             );
           } else {
-            return mapProductResponseWithUser(product, list_media.data);
+            return mapProductResponseWithUser(
+              product,
+              list_media.data,
+              category,
+            );
           }
         }),
       );
@@ -128,7 +140,7 @@ export class ProductService {
       const product = await this.productRepository.findOne({
         where: { id: id },
       });
-      if (!product) throw new NotFoundException('sản phẩm không tồn tại');
+      if (!product) throw new NotFoundException('Sản phẩm không tồn tại');
       let list_media: ApiResponse<MediaResponse[]> = await lastValueFrom(
         this.mediaServiceGrpc.getMediasByIds({
           media_ids: product.list_media_id,
@@ -137,6 +149,9 @@ export class ProductService {
       if (list_media.status != HttpStatus.OK) {
         throw new BadRequestException(list_media.message);
       }
+      const category = await this.categoryRepository.findOne({
+        where: { id: product.category_id },
+      });
       if (currentUser.roles.includes(Roles.ADMIN)) {
         let user_created_and_updated: ApiResponse<UserResponse[]> =
           await lastValueFrom(
@@ -159,13 +174,14 @@ export class ProductService {
             user_created,
             user_updated,
             list_media.data,
+            category,
           ),
         );
       } else {
         return createResponse(
           HttpStatus.OK,
           'OK',
-          mapProductResponseWithUser(product, list_media.data),
+          mapProductResponseWithUser(product, list_media.data, category),
         );
       }
     } catch (error) {
@@ -200,14 +216,18 @@ export class ProductService {
 
       product.user_id_created = currentUser.id;
       product.user_id_updated = currentUser.id;
+
       product = await this.productRepository.save(product);
-      let product_price =
-        await this.productPriceRepository.create(createProductDto);
-      product_price.user_id_created = currentUser.id;
-      product_price.user_id_updated = currentUser.id;
-      product_price.end_date = null;
-      product_price.product_id = product.id;
-      product_price = await this.productPriceRepository.save(product_price);
+      // let product_price =
+      //   await this.productPriceRepository.create(createProductDto);
+      // product_price.user_id_created = currentUser.id;
+      // product_price.user_id_updated = currentUser.id;
+      // product_price.end_date = null;
+      // product_price.product_id = product.id;
+      // await this.productPriceRepository.save(product_price);
+      const category = await this.categoryRepository.findOne({
+        where: { id: product.category_id },
+      });
       return createResponse(
         HttpStatus.OK,
         'OK',
@@ -216,6 +236,7 @@ export class ProductService {
           currentUser,
           currentUser,
           list_media.data,
+          category,
         ),
       );
     } catch (error) {
@@ -231,18 +252,25 @@ export class ProductService {
       const product = await this.productRepository.findOne({
         where: { id: updateProductDto.id },
       });
-      if (!product) throw new NotFoundException('Danh mục không tồn tại');
+      if (!product) throw new NotFoundException('Sản phẩm không tồn tại');
       product.user_id_updated = currentUser.id;
+      if (!updateProductDto.list_media_id.includes(product.default_media_id)) {
+        product.default_media_id = updateProductDto.list_media_id[0];
+      }
       Object.assign(product, updateProductDto);
-      this.productRepository.save(product);
+      await this.productRepository.save(product);
       let user_created: ApiResponse<UserResponse> = await lastValueFrom(
         this.userServiceGrpc.getUser({ id: product.user_id_created }),
       );
+
       let list_media: ApiResponse<MediaResponse[]> = await lastValueFrom(
         this.mediaServiceGrpc.getMediasByIds({
           media_ids: updateProductDto.list_media_id,
         }),
       );
+      const category = await this.categoryRepository.findOne({
+        where: { id: product.category_id },
+      });
       return createResponse(
         HttpStatus.OK,
         'OK',
@@ -251,6 +279,7 @@ export class ProductService {
           user_created.data,
           currentUser,
           list_media.data,
+          category,
         ),
       );
     } catch (error) {
@@ -268,10 +297,53 @@ export class ProductService {
       });
       if (!product) throw new NotFoundException('Danh mục không tồn tại');
       product.user_id_updated = currentUser.id;
-      this.productRepository.save(product);
+      await this.productRepository.save(product);
       return createResponse(HttpStatus.OK, 'OK', null);
     } catch (error) {
       throw new HttpException(error, HttpStatus.BAD_REQUEST);
     }
+  }
+
+  async changeStatus(
+    id: number,
+    status: number,
+  ): Promise<ApiResponse<ProductResponse>> {
+    const product = await this.productRepository.findOne({
+      where: { id: id },
+    });
+    if (!product) throw new NotFoundException('Sản phẩm không tồn tại');
+
+    product.status = status;
+
+    await this.productRepository.save(product); // Lưu vào database
+
+    let user_created: ApiResponse<UserResponse> = await lastValueFrom(
+      this.userServiceGrpc.getUser({ id: product.user_id_created }),
+    );
+    let user_updated: ApiResponse<UserResponse> = await lastValueFrom(
+      this.userServiceGrpc.getUser({ id: product.user_id_updated }),
+    );
+    let list_media: ApiResponse<MediaResponse[]> = await lastValueFrom(
+      this.mediaServiceGrpc.getMediasByIds({
+        media_ids: product.list_media_id,
+      }),
+    );
+    if (list_media.status != HttpStatus.OK) {
+      throw new BadRequestException(list_media.message);
+    }
+    const category = await this.categoryRepository.findOne({
+      where: { id: product.category_id },
+    });
+    return createResponse(
+      HttpStatus.OK,
+      'OK',
+      mapProductResponseWithAdmin(
+        product,
+        user_created.data,
+        user_updated.data,
+        list_media.data,
+        category,
+      ),
+    );
   }
 }

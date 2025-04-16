@@ -1,160 +1,224 @@
-import React, { useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
+import { Formik, Form, Field, ErrorMessage, FormikHelpers } from "formik";
+import * as Yup from "yup";
+import { HttpStatusCode } from "axios";
 import Popup from "../../../components/share/Popup/Popup";
-import CloseIcon from "@mui/icons-material/Close";
-import { Box, Button } from "@mui/material";
-import { updateCategory } from "../../../services/category/category-service";
-import { ICategory } from "../../../interface/ICategory";
-import { HttpStatusCode } from "../../../enums/Enum";
-import { upload } from "../../../services/media/media-service";
 import Toast from "../../../components/share/Toast/Toast";
-import Image from "../../../components/share/Image/Image";
+import {  updateCategory, getListParentCategory } from "../../../services/category/category-service";
+import { CategoryResponse } from "../../../response/category";
 import { getCookie } from "../../../services/cookie";
+import { MediaResponse } from "../../../response/media";
+import { upload } from "../../../services/media/media-service";
 
 interface UpdateCategoryProps {
   open: boolean;
-  onClose: () => void;
-  category: ICategory;
- 
+  setIsOpenUpdate: (value: boolean) => void;
+  setRefresh: (value: boolean) => void;
+  category: CategoryResponse | null;
 }
 
-const CreateCategoryPopup: React.FC<UpdateCategoryProps> = ({ open, onClose, category }) => {
-  const domainMedia = import.meta.env.VITE_API_DOMAIN + import.meta.env.VITE_API_MEDIA_PORT + "/";
-  const [name, setName] = useState(category.name);
-  const [image, setImage] = useState<File | null>(null);
+interface CategoryFormValues {
+  name: string;
+  description: string;
+  parent_id?: number;
+  media_id: number;
+}
 
-  const [description, setDescription] = useState(category.description);
-  const [imageName, setImageName] = useState(category.media.name);
-  const [imageUrl, setImageUrl] = useState<string>(domainMedia + category.media.url);
+const UpdateCategoryPopup: React.FC<UpdateCategoryProps> = ({ open, setRefresh, setIsOpenUpdate, category }) => {
   const [error, setError] = useState<string>("");
-  const [isSubmit, setIsSubmit] = useState(false);
-  // const dispatch = useAppDispatch();
+  const formikRef = useRef<any>(null);
+  const [listParentCategories, setListParentCategories] = useState<CategoryResponse[]>([]);
+  const [uploadedMedia, setUploadedMedia] = useState<MediaResponse[]>([]);
 
-  const clearData = () => {
-    setName("");
-    setDescription("");
-    setError("");
-    setIsSubmit(false);
+  // Initialize form values from category data
+  const getInitialValues = (): CategoryFormValues => {
+    if (!category) {
+      return {
+        name: "",
+        description: "",
+        parent_id: 0,
+        media_id: 0,
+      };
+    }
+
+    return {
+      name: category.name || "",
+      description: category.description || "",
+      parent_id: category.parent_id || 0,
+      media_id: category.media?.id || 0,
+    };
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setImage(e.target.files?.[0]);
+  const validationSchema = Yup.object({
+    name: Yup.string().required("Vui lòng nhập tên danh mục"),
+    media_id: Yup.number().min(1, "Vui lòng chọn hình ảnh").required("Vui lòng chọn hình ảnh"),
+  });
 
-      setImageUrl(URL.createObjectURL(e.target.files?.[0]));
-      setImageName(e.target.files?.[0].name);
-      setError("");
-      setIsSubmit(false);
+  useEffect(() => {
+    if (open) {
+      const fetchParentCategories = async () => {
+        try {
+          const response = await getListParentCategory({
+            status: 1,
+            branch_id: JSON.parse(getCookie("data_user")).branch_id,
+          });
+          setListParentCategories(response.data);
+        } catch (error) {
+          console.error("Error fetching parent categories:", error);
+        }
+      };
+
+      fetchParentCategories();
+    }
+  }, [open, category]);
+
+  // Handle media upload
+  // Handle media upload
+  const handleUploadMedia = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+
+    try {
+      // Convert FileList to File[] array
+      const files: File[] = Array.from(e.target.files);
+
+      // Call the upload service with the files array and type
+      const response = await upload(files, 1);
+
+      if (response.status === HttpStatusCode.Ok) {
+        setUploadedMedia(response.data);
+        if (formikRef.current) {
+          formikRef.current.setFieldValue("media_id", response.data[0].id);
+        }
+      } else {
+        setError("Không thể tải lên hình ảnh. Vui lòng thử lại.");
+      }
+    } catch (error) {
+      console.error("Error uploading media:", error);
+      setError("Không thể tải lên hình ảnh. Vui lòng thử lại.");
     }
   };
 
-  const handleDeleteImage = () => {
-    setImage(null);
-    setImageUrl("");
-  };
-
-  const handleSubmit = async () => {
+  const handleSubmit = async (values: CategoryFormValues, { setSubmitting }: FormikHelpers<CategoryFormValues>) => {
     try {
-      setIsSubmit(true);
-      if (name.length == 0) {
-        setError("Vui lòng điền đầy đủ thông tin");
+      if (!category) {
+        setError("Không tìm thấy thông tin danh mục");
         return;
       }
-      if (!imageUrl) {
-        setError("Vui lòng chọn hình ảnh");
-        return;
-      }
-      let media_id = 0;
-      if (image) {
-        const responseMedia = await upload([image], 1);
-        if (responseMedia.status != HttpStatusCode.Ok) {
-          setError(responseMedia.message);
-          return;
-        }
-        media_id = responseMedia.data[0].id;
-      } else {
-        media_id = category.media.id;
-      }
-      const branch_id = JSON.parse(getCookie("data_user")).branch_id;
-      const response = await updateCategory(category.id, name, description, branch_id, media_id);
-      if (response.status == HttpStatusCode.Ok) {
-       
-        Toast.ToastSuccess("Chỉnh sửa danh mục thành công");
-        clearData();
-        onClose();
+
+      const response = await updateCategory(category.id, values.name, values.description, JSON.parse(getCookie("data_user")).branch_id, values.media_id);
+
+      if (response.status === HttpStatusCode.Ok) {
+        Toast.ToastSuccess("Cập nhật danh mục thành công");
+        setRefresh(true);
+        setIsOpenUpdate(false);
       } else {
         setError(response.message);
       }
     } catch (err) {
-      setError("Login failed. Please check your credentials.");
+      setError("Cập nhật danh mục thất bại. Vui lòng thử lại.");
     } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // This function will be called when the Popup's submit button is clicked
+  const handlePopupSubmit = () => {
+    if (formikRef.current) {
+      formikRef.current.submitForm();
     }
   };
 
   return (
-    <Popup title=" Chỉnh sửa danh mục" open={open} onClose={onClose} onSubmit={handleSubmit} submitText="Chỉnh sửa" cancelText="Huỷ">
+    <Popup
+      title="Cập nhật danh mục"
+      open={open}
+      onClose={() => {
+        setIsOpenUpdate(false);
+      }}
+      onSubmit={handlePopupSubmit}
+      submitText="Cập nhật"
+    >
       <div className="card-body">
-        <form role="form">
-          <label>Tên danh mục</label>
-          <div className="mb-3">
-            <input
-              type="text"
-              className={isSubmit && name.length == 0 ? "is-invalid form-control" : "form-control"}
-              placeholder="Tên danh mục"
-              aria-label="Email"
-              aria-describedby="email-addon"
-              value={name}
-              onChange={(e) => {
-                setError("");
-                setIsSubmit(false);
-                setName(e.target.value);
-              }}
-            />
-          </div>
-          <label>Mô tả </label>
-          <div className="mb-3">
-            <textarea
-              className="form-control"
-              placeholder="Mô tả"
-              aria-label="Password"
-              aria-describedby="password-addon"
-              value={description}
-              rows={3}
-              onChange={(e) => {
-                setError("");
-                setIsSubmit(false);
-                setDescription(e.target.value);
-              }}
-            ></textarea>
-          </div>
-        </form>
+        <Formik initialValues={getInitialValues()} validationSchema={validationSchema} onSubmit={handleSubmit} innerRef={formikRef} enableReinitialize={true}>
+          {({ handleChange }) => (
+            <Form>
+              <label>Tên danh mục</label>
+              <div className="mb-3">
+                <Field
+                  type="text"
+                  name="name"
+                  className="form-control"
+                  placeholder="Tên danh mục"
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    setError("");
+                    handleChange(e);
+                  }}
+                />
+                <ErrorMessage name="name" component="div" className="text-danger" />
+              </div>
 
-        <Box className="d-flex align-items-center ">
-          {imageUrl && (
-            <div>
-              <ul className="list-img">
-                <li className="item flex-column">
-                  <div className="img">
-                    <Image src={imageUrl}></Image>
-                    <CloseIcon onClick={handleDeleteImage} className="btn-delete bg-gradient-secondary"></CloseIcon>
+              <label>Danh mục cha</label>
+              <div className="mb-3">
+                <Field
+                  as="select"
+                  name="parent_id"
+                  className="form-control"
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                    setError("");
+                    handleChange(e);
+                  }}
+                >
+                  <option value="0">Không có danh mục cha</option>
+                  {listParentCategories.map((parentCategory) =>
+                    // Don't allow selecting the current category as its own parent
+                    category && parentCategory.id !== category.id ? (
+                      <option key={parentCategory.id} value={parentCategory.id}>
+                        {parentCategory.name}
+                      </option>
+                    ) : null
+                  )}
+                </Field>
+              </div>
+
+              <label>Hình ảnh</label>
+              <div className="mb-3">
+                <input type="file" className="form-control" accept="image/*" onChange={handleUploadMedia} />
+                <Field type="hidden" name="media_id" />
+                <ErrorMessage name="media_id" component="div" className="text-danger" />
+
+                {uploadedMedia.length > 0 && (
+                  <div className="mt-2">
+                    <img src={uploadedMedia[0].url} alt="Category preview" style={{ maxWidth: "100%", maxHeight: "200px" }} />
                   </div>
+                )}
+              </div>
 
-                  <div className="file-name">{imageName}</div>
-                </li>
-              </ul>
-            </div>
+              <label>Mô tả</label>
+              <div className="mb-3">
+                <Field
+                  as="textarea"
+                  name="description"
+                  className="form-control"
+                  placeholder="Mô tả"
+                  rows={3}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+                    setError("");
+                    handleChange(e);
+                  }}
+                />
+              </div>
+
+              {error && (
+                <p className="text-danger" style={{ margin: "10px 0" }}>
+                  {error}
+                </p>
+              )}
+            </Form>
           )}
-          <Button variant="contained" component="label" className="btn bg-gradient-info ml-1" fullWidth sx={{ width: "120px" }}>
-            {!imageUrl ? "Thêm ảnh" : "Thay đổi"}
-            <input type="file" multiple={true} accept="image/*" hidden onChange={handleImageChange} />
-          </Button>
-        </Box>
-
-        <p className="text-danger" style={{ margin: "10px 0" }}>
-          {error}
-        </p>
+        </Formik>
       </div>
     </Popup>
   );
 };
 
-export default CreateCategoryPopup;
+export default UpdateCategoryPopup;

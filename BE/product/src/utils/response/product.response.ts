@@ -2,6 +2,7 @@ import { Timestamp } from 'typeorm';
 import { UserResponse } from './user.response';
 import { ProductEntity } from 'src/products/entities/product.entity';
 import { MediaResponse } from './media.response';
+import { CategoryResponse } from './category.response';
 
 export interface ProductResponse {
   id: number;
@@ -9,56 +10,63 @@ export interface ProductResponse {
   description: string;
   created_at: Timestamp;
   updated_at: Timestamp;
-  // price: number;
   status: number;
   user_created?: UserResponse;
   user_updated?: UserResponse;
 }
 
-export function mapProductResponseWithAdmin(
+function mapProductResponseBase(
   product: ProductEntity,
-  // price: number,
-  user_created: UserResponse,
-  user_updated: UserResponse,
   list_media: MediaResponse[],
+  category: CategoryResponse,
 ) {
-  let media_default = list_media.find(
-    (item) => item.id == product.default_media_id,
-  );
-  const response = {
+  const media_default = list_media.find(
+    (item) => item.id === product.default_media_id,
+  ) || {
+    id: 0,
+    url: '',
+    type: 0,
+    created_at: '',
+    updated_at: '',
+    size: 0,
+    status: false,
+  };
+
+  return {
     id: product.id,
     name: product.name,
-    // price: price,
+    price: product.price,
+    unit: product.unit,
+    quantity: product.quantity,
+    discount: product.discount,
     description: product.description,
     created_at: product.created_at,
     updated_at: product.updated_at,
     status: product.status,
-    user_created: user_created,
-    user_updated: user_updated,
     media: list_media,
-    media_default: media_default,
+    media_default,
+    category,
   };
-  return response;
+}
+
+export function mapProductResponseWithAdmin(
+  product: ProductEntity,
+  user_created: UserResponse,
+  user_updated: UserResponse,
+  list_media: MediaResponse[],
+  category: CategoryResponse,
+) {
+  return {
+    ...mapProductResponseBase(product, list_media, category),
+    user_created,
+    user_updated,
+  };
 }
 
 export function mapProductResponseWithUser(
   product: ProductEntity,
-  // price: number,
   list_media: MediaResponse[],
+  category: CategoryResponse,
 ) {
-  let media_default = list_media.find(
-    (item) => item.id == product.default_media_id,
-  );
-  const response = {
-    id: product.id,
-    name: product.name,
-    // price:price,
-    description: product.description,
-    created_at: product.created_at,
-    updated_at: product.updated_at,
-    status: product.status,
-    media: list_media,
-    media_default: media_default,
-  };
-  return response;
+  return mapProductResponseBase(product, list_media, category);
 }

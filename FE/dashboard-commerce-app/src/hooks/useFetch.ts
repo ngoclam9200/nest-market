@@ -1,5 +1,6 @@
-import axios from "axios";
+import axios, { HttpStatusCode } from "axios";
 import { useState } from "react";
+import { ApiConfig } from "../services/api-config";
 import { BaseResponse, HttpMethod } from "../services/base-response";
 import { useExpired } from "../state/expired-context";
 import { useLoading } from "../state/loading-context";
@@ -15,60 +16,70 @@ const initialFetchState: FetchState = {
   error: null,
 };
 
+const axiosInstance = axios.create({
+  baseURL: "",
+  headers: {
+    "content-type": "application/json",
+  },
+  responseType: "json",
+  timeout: 30000,
+});
+
+axiosInstance.interceptors.request.use(
+  (config) => {
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error instanceof Error ? error : new Error(String(error)));
+  }
+);
+
+axiosInstance.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    return Promise.reject(error instanceof Error ? error : new Error(String(error)));
+  }
+);
+
 interface UseFetchProps {
   endPointUrl?: string;
   showScreenLoading?: boolean;
-  projectId?: number;
+  projectId?: string;
 }
 
-const useApi = <T>(method: HttpMethod, showLoading: boolean) => {
+const useApi = <T>(method: HttpMethod, showLoading: boolean, projectId?: string) => {
   const [fetchState, setFetchState] = useState<FetchState>(initialFetchState);
   const [baseResponse, setBaseResponse] = useState<BaseResponse<T>>();
   const { setIsLoading } = useLoading();
   const { setExpired } = useExpired();
   const finalToken = getBearerToken() ?? "";
-
-  const axiosInstance = axios.create({
-    baseURL: "",
-    headers: {
-      "content-type": "application/json",
-      ...(finalToken && { Authorization: `Bearer ${finalToken}` }),
-    },
-    responseType: "json",
-    timeout: 15000,
-  });
-
-  axiosInstance.interceptors.request.use(
-    (config) => {
-      return config;
-    },
-    (error: unknown) => {
-      return Promise.reject(error instanceof Error ? error : new Error(String(error)));
-    }
-  );
-
-  axiosInstance.interceptors.response.use(
-    (response) => {
-      return response;
-    },
-    (error: unknown) => {
-      return Promise.reject(error instanceof Error ? error : new Error(String(error)));
-    }
-  );
-
-  const request = async ({domain="", endPoint = "", data = {} }) => {
+  const request = async ({ endPoint = "", data = {} }): Promise<BaseResponse<T> | void> => {
     if (showLoading) setIsLoading(true);
     setFetchState({ loading: true, error: null });
     try {
+      const domain = ApiConfig.API_URL+ projectId;
       const response = await axiosInstance({
-        url: `${domain}/api/${endPoint}`,
+        url: `${domain}/api/v1${endPoint}`,
         method: method,
+        headers: {
+          ...(finalToken && {
+            Authorization: `Bearer ${finalToken}`,
+          }),
+          ...(projectId && { "x-svc-id": projectId }),
+          platform: "1", // WEB = 1, MOBILE = 2,
+        },
         ...(method === HttpMethod.GET && { params: data }),
         ...(method === HttpMethod.POST && { data: data }),
       });
-      setBaseResponse(response.data);
       setFetchState({ loading: false, error: null });
-      if (response.status === 401 || response.data.status === 401) setExpired(true);
+      if (response.data.status === HttpStatusCode.Unauthorized) {
+        setExpired(true);
+      } else {
+        setBaseResponse(response.data);
+      }
+      return response.data;
     } catch (error: unknown) {
       let errorMessage = "";
       if (axios.isCancel(error)) {
@@ -87,10 +98,10 @@ const useApi = <T>(method: HttpMethod, showLoading: boolean) => {
 };
 // Wrapper for cleaner method access
 export const useFetchData = {
-  Get: <T>({  showScreenLoading = false }: UseFetchProps = {}) => {
-    return useApi<T>(HttpMethod.GET, showScreenLoading);
+  Get: <T>({ projectId = ApiConfig.PROJECT_ID.USER_SERVICE, showScreenLoading = false }: UseFetchProps = {}) => {
+    return useApi<T>(HttpMethod.GET, showScreenLoading, projectId);
   },
-  Post: <T>({  showScreenLoading = false }: UseFetchProps = {}) => {
-    return useApi<T>(HttpMethod.POST, showScreenLoading);
+  Post: <T>({ projectId = ApiConfig.PROJECT_ID.USER_SERVICE, showScreenLoading = false }: UseFetchProps = {}) => {
+    return useApi<T>(HttpMethod.POST, showScreenLoading, projectId);
   },
 };

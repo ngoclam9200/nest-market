@@ -1,12 +1,8 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-// import { login } from "../../../services/Auth/AuthService";
-import { HttpStatusCode } from "../../../enums/Enum";
 import { deleteCookie, setCookie } from "../../../services/cookie";
-import { useFetchData } from "../../../hooks/useFetch";
+import { AuthService } from "../../../services/auth/auth-service";
 import { isSuccess } from "../../../services/base-response";
-import { API_AUTH } from "../../../services/api-endpoint";
-import { ApiConfig } from "../../../services/api-config";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [email, setEmail] = useState<string>("");
@@ -14,46 +10,33 @@ const Login = () => {
   // const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { fetch: onLogin, response: resLogin, loading: loading } = AuthService.login();
+
   useEffect(() => {
     deleteCookie("access_token");
     deleteCookie("data_user");
   }, []);
 
-  const {
-    request: fetchLogin,
-    baseResponse: responseLogin,
-    loading,
-  } = useFetchData.Post<any>({
-    showScreenLoading: true,
-  });
   const handleSubmitLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
     try {
-      fetchLogin({
-        endPoint: API_AUTH.LOGIN(),
-        domain: ApiConfig.DOMAIN_LOGIN,
-        data: {
-          email: email,
-          password: password,
-        },
-      });
-      
+      onLogin({ email, password });
     } catch (err) {
       setError("Đăng nhập không thành công. Vui lòng kiểm tra lại thông tin đăng nhập của bạn.");
-    }  
+    }
   };
   useEffect(() => {
-    if (responseLogin) {
-      if (isSuccess(responseLogin)) {
-        setCookie("data_user", JSON.stringify(responseLogin.data));
-        setCookie("access_token", responseLogin.data.access_token);
+    if (resLogin) {
+      if (isSuccess(resLogin)) {
+        setCookie("data_user", JSON.stringify(resLogin.data));
+        setCookie("access_token", resLogin.data.access_token);
         navigate("/");
       } else {
-        setError(responseLogin.message);
+        setError(resLogin.message);
       }
     }
-  }, [responseLogin]);
+  }, [resLogin]);
   return (
     <>
       <main className="main-content login  mt-0 h-100" id="login-container">
@@ -112,12 +95,7 @@ const Login = () => {
                         </div> */}
 
                         <div className="form-check form-switch">
-                          <input
-                            style={{ minWidth: "0px !important", height: "20px !important" }}
-                            className="form-check-input"
-                            type="checkbox"
-                            id="rememberMe"
-                          />
+                          <input style={{ minWidth: "0px !important", height: "20px !important" }} className="form-check-input" type="checkbox" id="rememberMe" />
                           <label className="form-check-label">Lưu thông tin đăng nhập</label>
                         </div>
                         <div className="text-center">

@@ -10,6 +10,9 @@ const ToastSuccess = (text: string) => {
     draggable: true,
     progress: undefined,
     theme: "colored",
+    style: {
+      width: "auto",
+    },
   });
 };
 const ToastError = (text: string) => {

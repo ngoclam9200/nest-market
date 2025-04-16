@@ -1,5 +1,13 @@
-
-import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, Timestamp, UpdateDateColumn } from "typeorm";
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  Timestamp,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity('products')
 export class ProductEntity {
@@ -36,8 +44,21 @@ export class ProductEntity {
   @Column()
   branch_id: number;
 
-  @Column({default: 1})
+  @Column({ default: 1 })
   status: number;
+
+  @Column({ default: '' })
+  unit: string;
+
+  @Column({ default: 0 })
+  price: number;
+
+  @Column({ default: 0 })
+  discount: number;
+
+  @Column({ default: 0 })
+  quantity: number;
+   
+  @Column({ default: 0 })
+  stock : number;
 }
-
-

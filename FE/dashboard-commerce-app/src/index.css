@@ -23,3 +23,10 @@ body {
   background-color: #ffffff;
   background-color: #f8f9fa !important;
 }
+
+.text-danger{
+  font-size: 12px;
+}
+.Toastify__toast-container{
+  width: auto !important;
+}

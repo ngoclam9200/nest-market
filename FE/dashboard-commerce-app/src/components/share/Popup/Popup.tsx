@@ -17,35 +17,15 @@ interface PopupProps {
   maxWidth?: "xs" | "sm" | "md" | "lg" | "xl";
 }
 
-const Popup: React.FC<PopupProps> = ({
-  title,
-  children,
-  maxWidth = "md",
-  open,
-  onClose,
-  onSubmit,
-  submitText = "Submit",
-  cancelText = "Cancel",
-}) => {
+const Popup: React.FC<PopupProps> = ({ title, children, maxWidth = "md", open, onClose, onSubmit, submitText = "Submit", cancelText = "Hủy" }) => {
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth={maxWidth}
-      sx={{ minWidth: 400 }}
-    >
-      <DialogTitle
-        style={{ fontFamily: "Open Sans" }}
-        className="font-weight-bolder"
-      >
+    <Dialog open={open} onClose={onClose} fullWidth={true} maxWidth={maxWidth}>
+      <DialogTitle style={{ fontFamily: "Open Sans" }} className="font-weight-bolder">
         {title}
       </DialogTitle>
       <DialogContent>{children}</DialogContent>
       <DialogActions>
-        <Button
-          onClick={onClose}
-          className="badge badge-sm bg-gradient-secondary color-white"
-        >
+        <Button onClick={onClose} className="badge badge-sm bg-gradient-secondary color-white">
           {cancelText}{" "}
         </Button>
         {onSubmit && (

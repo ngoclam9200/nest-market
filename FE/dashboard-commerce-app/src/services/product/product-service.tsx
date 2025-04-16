@@ -1,17 +1,14 @@
 import { getData, postData } from "../api-service";
-import {  ApiUrlProduct, getUrlWithEndPoint } from "../../enums/ApiEnum";
-import { IDataArray, IHttpResponse } from "../../interface/IHttpResponse";
-import { IProduct } from "../../interface/IProduct";
+ 
+import { DataArray, HttpResponse } from "../../response/http-response";
+import { ProductResponse } from "../../response/product";
+import { API_PRODUCT_URL } from "../api-endpoint";
 
-const domain =
-  import.meta.env.VITE_API_DOMAIN + import.meta.env.VITE_API_PRODUCT_PORT + import.meta.env.VITE_API_PREFIX;
+const domain = import.meta.env.VITE_API_DOMAIN + import.meta.env.VITE_API_PRODUCT_PORT + import.meta.env.VITE_API_PREFIX;
 
-export const getListProduct = async (param: {
-  page: number;
-  limit: number;
-}): Promise<IHttpResponse<IDataArray<IProduct>>> => {
+export const getListProduct = async (param: { page: number; limit: number }): Promise<HttpResponse<DataArray<ProductResponse>>> => {
   try {
-    const response = await getData(domain + ApiUrlProduct.GET_LIST_PRODUCT, param);
+    const response = await getData(domain + API_PRODUCT_URL.GET_LIST_PRODUCT, param);
     return response;
   } catch (error) {
     console.error("Error logging in:", error);
@@ -26,8 +23,11 @@ export const createProduct = async (
   price: number,
   branch_id: number,
   default_media_id: number,
-  list_media_id: number[]
-): Promise<IHttpResponse<any>> => {
+  list_media_id: number[],
+  discount: number,
+  unit: string,
+  quantity: number
+): Promise<HttpResponse<any>> => {
   try {
     const response = await postData<{
       name: string;
@@ -37,7 +37,10 @@ export const createProduct = async (
       branch_id: number;
       default_media_id: number;
       list_media_id: number[];
-    }>(domain + ApiUrlProduct.CREATE_PRODUCT, {
+      discount: number;
+      unit: string;
+      quantity: number;
+    }>(domain + API_PRODUCT_URL.CREATE_PRODUCT, {
       name,
       description,
       category_id,
@@ -45,6 +48,9 @@ export const createProduct = async (
       branch_id,
       default_media_id,
       list_media_id,
+      discount,
+      unit,
+      quantity,
     });
     return response;
   } catch (error) {
@@ -56,19 +62,34 @@ export const updateProduct = async (
   id: number,
   name: string,
   description: string,
-  media_id: number
-): Promise<IHttpResponse<any>> => {
+  category_id: number,
+  list_media_id: number[],
+  discount: number,
+  unit: string,
+  price: number,
+  quantity: number
+): Promise<HttpResponse<any>> => {
   try {
     const response = await postData<{
       id: number;
       name: string;
       description: string;
-      media_id: number;
-    }>(domain + ApiUrlProduct.UPDATE_PRODUCT, {
+      category_id: number;
+      list_media_id: number[];
+      discount: number;
+      unit: string;
+      price: number;
+      quantity: number;
+    }>(domain + API_PRODUCT_URL.UPDATE_PRODUCT(), {
       id,
       name,
       description,
-      media_id,
+      category_id,
+      list_media_id,
+      discount,
+      unit,
+      price,
+      quantity,
     });
     return response;
   } catch (error) {
@@ -77,9 +98,9 @@ export const updateProduct = async (
   }
 };
 
-export const detailProduct = async (): Promise<IHttpResponse<IProduct>> => {
+export const getDetailProduct = async (id: number): Promise<HttpResponse<ProductResponse>> => {
   try {
-    const response = await getData(domain + (ApiUrlProduct.DETAIL_PRODUCT), {});
+    const response = await getData(domain + API_PRODUCT_URL.DETAIL_PRODUCT(id), {});
     return response;
   } catch (error) {
     console.error("Error fetching product details:", error);
@@ -87,19 +108,12 @@ export const detailProduct = async (): Promise<IHttpResponse<IProduct>> => {
   }
 };
 
-export const changeStatusProduct = async (id: number, status: number): Promise<IHttpResponse<any>> => {
+export const changeStatusProduct = async (id: number, status: number): Promise<HttpResponse<any>> => {
   try {
-
-    const response = await postData<{
-      status: number;
-    }>(domain + getUrlWithEndPoint("/change-status", "categories/" + id), {
-      status,
-    });
+    const response = await postData(domain + API_PRODUCT_URL.CHANGE_STATUS_PRODUCT(), { id: id, status: status });
     return response;
   } catch (error) {
     console.error("Error logging in:", error);
     throw error;
   }
 };
-
-

@@ -181,6 +181,7 @@ export class CategoriesController {
   }
 
   @Post(':id/change-status')
+  @UseGuards(AuthorizeGuard(['admin']))
   async changeStatus(@Param('id') id: number, @Body('status') status: number) {
     return this.categoriesService.changeStatus(id, status);
   }

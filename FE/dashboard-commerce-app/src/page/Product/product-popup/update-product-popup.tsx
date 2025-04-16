@@ -1,93 +1,168 @@
 import React, { useEffect, useState, useRef } from "react";
 import CloseIcon from "@mui/icons-material/Close";
+import { Box, Button, Grid } from "@mui/material";
 import { Formik, Form, Field, ErrorMessage, FormikHelpers } from "formik";
 import * as Yup from "yup";
 import { HttpStatusCode } from "axios";
 import Popup from "../../../components/share/Popup/Popup";
 import Toast from "../../../components/share/Toast/Toast";
-import { updateProduct } from "../../../services/product/product-service";
-import { formatCurrency } from "../../../utils/FormatCurrency";
-import { IProduct } from "../../../interface/IProduct";
 import { getAllChildCategory } from "../../../services/category/category-service";
 import { getCookie } from "../../../services/cookie";
-import { ICategory } from "../../../interface/ICategory";
+import { upload } from "../../../services/media/media-service";
+import { getDetailProduct, updateProduct } from "../../../services/product/product-service";
+import { removeNonNumeric, formatCurrency } from "../../../utils/FormatCurrency";
+import { CategoryResponse } from "../../../response/category";
+import { MediaResponse } from "../../../response/media";
+import { ProductResponse } from "../../../response/product";
 
 interface UpdateProductProps {
   open: boolean;
   setIsOpenUpdate: (value: boolean) => void;
   setRefresh: (value: boolean) => void;
-  product: IProduct | null;
+  productId: number;
 }
 
 interface ProductFormValues {
+  id: number;
   name: string;
+  price: string;
+  discount: number;
+  unit: string;
+  categoryId: number;
   description: string;
-  media_id: number;
+  quantity: number;
 }
 
-const UpdateProductPopup: React.FC<UpdateProductProps> = ({ open, setRefresh, setIsOpenUpdate, product }) => {
+const UpdateProductPopup: React.FC<UpdateProductProps> = ({ open, setRefresh, setIsOpenUpdate, productId }) => {
+  const [image, setImage] = useState<File[] | null>(null);
+  const [existingImages, setExistingImages] = useState<MediaResponse[]>([]);
+  const [listCategory, setListCategory] = useState<CategoryResponse[]>([]);
   const [error, setError] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [productData, setProductData] = useState<ProductResponse>(new ProductResponse());
   const formikRef = useRef<any>(null);
-  const [listCategory, setListCategory] = useState<ICategory[]>([]);
+  const domainMedia = import.meta.env.VITE_API_DOMAIN + import.meta.env.VITE_API_MEDIA_PORT + "/";
 
-  // Initialize form values from product data
-  const getInitialValues = (): ProductFormValues => {
-    if (!product) {
-      return {
-        name: "",
-        description: "",
-        media_id: -1,
-      };
-    }
-
-    return {
-      name: product.name || "",
-      description: product.description || "",
-      media_id: product.media_id || -1,
-    };
+  const initialValues: ProductFormValues = {
+    id: productData?.id || 0,
+    name: productData?.name || "",
+    price: productData?.price ? formatCurrency(productData.price) : "0",
+    discount: productData?.discount || 0,
+    unit: productData?.unit || "",
+    categoryId: productData?.category.id || -1,
+    description: productData?.description || "",
+    quantity: productData?.quantity || 0,
   };
 
   const validationSchema = Yup.object({
     name: Yup.string().required("Vui lòng nhập tên sản phẩm"),
-    media_id: Yup.number().min(0, "Vui lòng chọn hình ảnh").required("Vui lòng chọn hình ảnh"),
+    price: Yup.string().required("Vui lòng nhập giá sản phẩm"),
+    discount: Yup.number().min(0, "Giảm giá không được nhỏ hơn 0").max(100, "Giảm giá không được lớn hơn 100%").required("Vui lòng nhập giảm giá"),
+    unit: Yup.string().required("Vui lòng nhập đơn vị tính"),
+    categoryId: Yup.number().min(0, "Vui lòng chọn danh mục").required("Vui lòng chọn danh mục"),
   });
 
-    useEffect(() => {
-      if (open) {
-        // Fetch categories
-        const fetchDataListCategory = async () => {
-          let response = await getAllChildCategory({
-            status: 1,
-            branch_id: JSON.parse(getCookie("data_user")).branch_id,
-          });
-          setListCategory(response.data);
-        };
-        fetchDataListCategory();
+  useEffect(() => {
+    if (open && productId) {
+      fetchProductData();
+      fetchCategories();
+    }
+  }, [open, productId]);
 
-        
-      }
-    }, [open]);
-
-  const handleSubmit = async (values: ProductFormValues, { setSubmitting }: FormikHelpers<ProductFormValues>) => {
+  const fetchProductData = async () => {
+    setLoading(true);
     try {
-      if (!product) {
-        setError("Không tìm thấy thông tin sản phẩm");
+      const response = await getDetailProduct(productId);
+      if (response.status === HttpStatusCode.Ok && response.data) {
+        setProductData(response.data);
+
+        // Set existing images if available
+        if (response.data.media && response.data.media.length > 0) {
+          setExistingImages(response.data.media);
+        }
+      } else {
+        setError("Không thể tải thông tin sản phẩm");
+      }
+    } catch (err) {
+      setError("Đã xảy ra lỗi khi tải thông tin sản phẩm");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      let response = await getAllChildCategory({
+        status: 1,
+        branch_id: JSON.parse(getCookie("data_user")).branch_id,
+      });
+      setListCategory(response.data);
+    } catch (err) {
+      setError("Không thể tải danh mục sản phẩm");
+    }
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const selectedFiles = Array.from(e.target.files);
+      setImage(selectedFiles);
+      setError("");
+    }
+  };
+
+  const handleDeleteImage = (index: number) => {
+    if (image) {
+      const updatedImages = image.filter((_, i) => i !== index);
+      setImage(updatedImages.length > 0 ? updatedImages : null);
+    }
+  };
+
+  const handleDeleteExistingImage = (index: number) => {
+    const updatedImages = existingImages.filter((_, i) => i !== index);
+    setExistingImages(updatedImages);
+  };
+
+  const handleSubmit = async (values: ProductFormValues, { resetForm }: FormikHelpers<ProductFormValues>) => {
+    try {
+      if (!existingImages.length && (!image || image.length === 0)) {
+        setError("Vui lòng chọn hình ảnh");
         return;
       }
 
-      const response = await updateProduct(product.id, values.name, values.description, values.media_id);
+      let list_media_id = existingImages.map((media) => media.id);
+      let default_media_id = existingImages.length > 0 ? existingImages[0].id : 0;
+
+      // Upload new images if any
+      if (image && image.length > 0) {
+        const responseMedia = await upload(image, 1);
+        if (responseMedia.status === HttpStatusCode.Ok) {
+          default_media_id = responseMedia.data[0].id;
+          const new_media_ids = responseMedia.data.map((md: MediaResponse) => md.id);
+          list_media_id = [...list_media_id, ...new_media_ids];
+        } else {
+          setError(responseMedia.message);
+          return;
+        }
+      }
+
+      const price_product = Number(removeNonNumeric(values.price));
+
+      // Update updateProduct function to include discount and unit
+      const response = await updateProduct(values.id, values.name, values.description, values.categoryId, list_media_id, values.discount, values.unit, price_product, values.quantity);
 
       if (response.status === HttpStatusCode.Ok) {
         Toast.ToastSuccess("Cập nhật sản phẩm thành công");
         setRefresh(true);
+        resetForm();
+        setImage(null);
+        setExistingImages([]);
+        setError("");
         setIsOpenUpdate(false);
       } else {
         setError(response.message);
       }
     } catch (err) {
       setError("Cập nhật sản phẩm thất bại. Vui lòng thử lại.");
-    } finally {
-      setSubmitting(false);
     }
   };
 
@@ -107,91 +182,208 @@ const UpdateProductPopup: React.FC<UpdateProductProps> = ({ open, setRefresh, se
       }}
       onSubmit={handlePopupSubmit}
       submitText="Cập nhật"
+      maxWidth="md"
     >
       <div className="card-body">
-        <Formik initialValues={getInitialValues()} validationSchema={validationSchema} onSubmit={handleSubmit} innerRef={formikRef} enableReinitialize={true}>
-          {({ handleChange }) => (
-            <Form>
-              <label>Tên sản phẩm</label>
-              <div className="mb-3">
-                <Field
-                  type="text"
-                  name="name"
-                  className="form-control"
-                  placeholder="Tên sản phẩm"
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    setError("");
-                    handleChange(e);
-                  }}
-                />
-                <ErrorMessage name="name" component="div" className="text-danger" />
-              </div>
-
-              <label>Mô tả</label>
-              <div className="mb-3">
-                <Field
-                  as="textarea"
-                  name="description"
-                  className="form-control"
-                  placeholder="Mô tả"
-                  rows={3}
-                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
-                    setError("");
-                    handleChange(e);
-                  }}
-                />
-              </div>
-
-              <label>Hình ảnh</label>
-              <div className="mb-3">
-                {product && product.media ? (
-                  <div>
+        {loading ? (
+          <div className="text-center">
+            <p>Đang tải thông tin sản phẩm...</p>
+          </div>
+        ) : (
+          <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit} innerRef={formikRef} enableReinitialize={true}>
+            {({ values, handleChange, setFieldValue }) => (
+              <Form>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={6}>
+                    <label>Tên sản phẩm</label>
                     <div className="mb-3">
-                      <div className="d-flex align-items-center">
-                        <li   className="item flex-column">
-                          <div className="img">
-                            {/* <img src={URL.createObjectURL(img)} alt={`Product image ${index}`} /> */}
-                            {/* <CloseIcon onClick={() => handleDeleteImage(index)} className="btn-delete bg-gradient-secondary" /> */}
-                          </div>
-                          {/* <div className="file-name">{img.name}</div> */}
-                        </li>
-                      </div>
+                      <Field
+                        type="text"
+                        name="name"
+                        className="form-control"
+                        placeholder="Tên sản phẩm"
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          setError("");
+                          handleChange(e);
+                        }}
+                      />
+                      <ErrorMessage name="name" component="div" className="text-danger" />
                     </div>
 
-                    <Field type="hidden" name="media_id" value={product.media_id} />
-                  </div>
-                ) : (
-                  <div className="alert alert-warning">Sản phẩm không có hình ảnh. Vui lòng thêm hình ảnh trước khi cập nhật.</div>
-                )}
-                <ErrorMessage name="media_id" component="div" className="text-danger" />
-              </div>
-
-              <div className="mb-3">
-                <label>Thông tin khác</label>
-                <div className="row">
-                  <div className="col-md-6">
-                    <div className="form-group">
-                      <label className="form-control-label">Giá</label>
-                      <p className="form-control-static">{formatCurrency(product?.price || 0)}</p>
+                    <label>Giá</label>
+                    <div className="mb-3">
+                      <Field
+                        type="text"
+                        name="price"
+                        className="form-control"
+                        placeholder="Giá"
+                        value={values.price}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          const numericValue = removeNonNumeric(e.target.value);
+                          setFieldValue("price", formatCurrency(Number(numericValue)));
+                          setError("");
+                        }}
+                      />
+                      <ErrorMessage name="price" component="div" className="text-danger" />
                     </div>
-                  </div>
-                  <div className="col-md-6">
-                    <div className="form-group">
-                      <label className="form-control-label">Tồn kho</label>
-                      <p className="form-control-static">{product?.stock || 0}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
 
-              {error && (
-                <p className="text-danger" style={{ margin: "10px 0" }}>
-                  {error}
-                </p>
-              )}
-            </Form>
-          )}
-        </Formik>
+                    <label>Giảm giá (%)</label>
+                    <div className="mb-3">
+                      <Field
+                        type="number"
+                        name="discount"
+                        className="form-control"
+                        placeholder="Giảm giá (%)"
+                        min="0"
+                        max="100"
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          if (e.target.value && Number(e.target.value) > 100) {
+                            e.target.value = "100";
+                          }
+                          setError("");
+                          handleChange(e);
+                        }}
+                      />
+                      <ErrorMessage name="discount" component="div" className="text-danger" />
+                    </div>
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <label>Đơn vị tính</label>
+                    <div className="mb-3">
+                      <Field
+                        type="text"
+                        name="unit"
+                        className="form-control"
+                        placeholder="Đơn vị tính (ví dụ: kg, cái, hộp)"
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          setError("");
+                          handleChange(e);
+                        }}
+                      />
+                      <ErrorMessage name="unit" component="div" className="text-danger" />
+                    </div>
+
+                    <label>Thuộc danh mục</label>
+                    <div className="mb-3">
+                      <Field
+                        as="select"
+                        name="categoryId"
+                        className="form-select"
+                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                          setError("");
+                          setFieldValue("categoryId", Number(e.target.value));
+                        }}
+                      >
+                        <option value={-1}>Vui lòng chọn</option>
+                        {listCategory && listCategory.length > 0 ? (
+                          listCategory.map((category) => (
+                            <option key={category.id} value={category.id}>
+                              {category.name}
+                            </option>
+                          ))
+                        ) : (
+                          <option disabled={true} key={-1} value={-1}>
+                            Không tìm thấy danh mục
+                          </option>
+                        )}
+                      </Field>
+                      <ErrorMessage name="categoryId" component="div" className="text-danger" />
+                    </div>
+
+                    <label>Số lượng</label>
+                    <div className="mb-3">
+                      <Field
+                        type="text"
+                        name="quantity"
+                        className="form-control"
+                        placeholder="Số lượng"
+                        value={values.price}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          const numericValue = removeNonNumeric(e.target.value);
+                          setFieldValue("quantity", formatCurrency(Number(numericValue)));
+                          setError("");
+                        }}
+                      />
+                      <ErrorMessage name="quantity" component="div" className="text-danger" />
+                    </div>
+                  </Grid>
+                  <Grid item className="pt-0" md={12}>
+                    <label>Mô tả</label>
+                    <div className="mb-3">
+                      <Field
+                        as="textarea"
+                        name="description"
+                        className="form-control"
+                        placeholder="Mô tả"
+                        rows={3}
+                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+                          setError("");
+                          handleChange(e);
+                        }}
+                      />
+                    </div>
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    {/* <h6>Hình ảnh sản phẩm</h6> */}
+
+                    {/* Existing images */}
+                    {existingImages && existingImages.length > 0 && (
+                      <Box className="d-flex align-items-center mb-3">
+                        <div>
+                          <label>Hình ảnh hiện tại</label>
+                          <ul className="list-img">
+                            {existingImages.map((img, index) => (
+                              <li key={index} className="item flex-column">
+                                <div className="img">
+                                  <img src={domainMedia + img.url} alt={`Product image ${index}`} />
+                                  <CloseIcon onClick={() => handleDeleteExistingImage(index)} className="btn-delete bg-gradient-secondary" />
+                                </div>
+                                <div className="file-name">Ảnh {index + 1}</div>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </Box>
+                    )}
+
+                    {/* New images */}
+                    {image && image.length > 0 && (
+                      <Box className="d-flex align-items-center mb-3">
+                        <div>
+                          <h6>Hình ảnh mới</h6>
+                          <ul className="list-img">
+                            {image.map((img, index) => (
+                              <li key={index} className="item flex-column">
+                                <div className="img">
+                                  <img src={URL.createObjectURL(img)} alt={`New product image ${index}`} />
+                                  <CloseIcon onClick={() => handleDeleteImage(index)} className="btn-delete bg-gradient-secondary" />
+                                </div>
+                                <div className="file-name">{img.name}</div>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </Box>
+                    )}
+
+                    <Button variant="contained" component="label" className="btn bg-gradient-info ml-1" sx={{ marginTop: 2, width: "150px" }}>
+                      {!image ? "Thêm ảnh" : "Thay đổi"}
+                      <input type="file" multiple={true} accept="image/*" hidden onChange={handleImageChange} />
+                    </Button>
+
+                    {error && (
+                      <p className="text-danger" style={{ margin: "10px 0" }}>
+                        {error}
+                      </p>
+                    )}
+                  </Grid>
+                </Grid>
+              </Form>
+            )}
+          </Formik>
+        )}
       </div>
     </Popup>
   );

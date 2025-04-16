@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from "axios";
-import { IHttpResponse } from "../interface/IHttpResponse";
+import { IHttpResponse } from "../response/http-response";
 import { getBearerToken } from "./cookie";
 
 export const postData = async <T,>(url: string, data: T): Promise<IHttpResponse<any>> => {
@@ -11,7 +11,6 @@ export const postData = async <T,>(url: string, data: T): Promise<IHttpResponse<
         "Content-Type": "application/json",
       },
     });
-
 
     return response.data;
   } catch (error) {

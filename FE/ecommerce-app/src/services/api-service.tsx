@@ -1,16 +1,11 @@
-// apiService.ts
-
 import axios, { AxiosResponse } from "axios";
-import { getBearerToken } from "./Cookie";
-import { IHttpResponse } from "../interface/IHttpResponse";
+import { HttpResponse } from "../response/http-response";
+import { getBearerToken } from "./cookie";
 
-export const postData = async <T,>(
-  url: string,
-  data: T
-): Promise<IHttpResponse<any>> => {
+export const postData = async <T,>(url: string, data: T): Promise<HttpResponse<any>> => {
   try {
     const token = getBearerToken();
-    const response: AxiosResponse<IHttpResponse<any>> = await axios.post(url, data, {
+    const response: AxiosResponse<HttpResponse<any>> = await axios.post(url, data, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -27,14 +22,15 @@ export const postData = async <T,>(
   }
 };
 
-export const getData = async (url: string): Promise<IHttpResponse<any>> => {
+export const getData = async (url: string, param?: any): Promise<HttpResponse<any>> => {
   try {
     const token = getBearerToken();
-    const response: AxiosResponse<IHttpResponse<any>> = await axios.get(url, {
+    const response: AxiosResponse<HttpResponse<any>> = await axios.get(url, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
+      params: param,
     });
 
     return response.data;

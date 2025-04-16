@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import CreateCategoryPopup from "./category-popup/create-category-popup";
-import { ICategory } from "../../interface/ICategory";
+import { CategoryResponse } from "../../response/category";
 import NotFound from "../../components/share/NotFound/NotFound";
 import ButtonAddNew from "../../components/share/ButtonAddNew/ButtonAddNew";
 import TitleCard from "../../components/share/TitleCard/TitleCard";
@@ -18,94 +18,76 @@ import UpdateCategoryPopup from "./category-popup/update-category-popup";
 import ChangeStatusCategoryPopup from "./category-popup/change-status-category-popup";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ChangeStatusButton from "../../components/share/ButtonActionTable/ChangeStatusButton";
-import { getCategoryWithCode, getListChildCategory, getListParentCategory } from "../../services/category/category-service";
+
 import { getCookie } from "../../services/cookie";
+import { CategoryService } from "../../services/category/category-service";
+import { isSuccess } from "../../services/base-response";
 
 const CategoryList = () => {
   const domainMedia = import.meta.env.VITE_API_DOMAIN + import.meta.env.VITE_API_MEDIA_PORT + "/";
   const [isCreatePopupOpen, setIsCreatePopupOpen] = useState(false);
   const [isUpdatePopupOpen, setIsUpdatePopupOpen] = useState(false);
   const [isChangeStatusPopupOpen, setIsChangeStatusPopupOpen] = useState(false);
-  const [categoryUpdate, setCategoryUpdate] = useState<ICategory | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [currentParentCategory, setCurrentParentCategory] = useState<ICategory | null>(null);
-  const [listParentCategories, setListParentCategories] = useState<ICategory[]>([]);
-  const [listChildCategories, setListChildCategories] = useState<ICategory[]>([]);
+  const [currentParentCategory, setCurrentParentCategory] = useState<CategoryResponse | null>(null);
+  const [listParentCategories, setListParentCategories] = useState<CategoryResponse[]>([]);
+  const [listChildCategories, setListChildCategories] = useState<CategoryResponse[]>([]);
   const [totalRecordListChildCategories, setTotalRecordListChildCategories] = useState(0);
-  const [showListCategory, setShowListCategory] = useState<ICategory[]>([]);
+  const [showListCategory, setShowListCategory] = useState<CategoryResponse[]>([]);
+
+  const [dataObjectCategory, setDataObjectCategory] = useState<CategoryResponse>(new CategoryResponse());
 
   const navigate = useNavigate();
   const location = useLocation();
   const { parentNameCategory } = useParams<{ parentNameCategory: string }>();
 
-  const LIMIT = 2;
+  const LIMIT = 10;
   const [pageListChild, setPageListChild] = useState(1);
-  const [isCallApiListParent, setIsCallApiListParent] = useState(false);
+  const [refresh, setRefresh] = useState(false);
 
-  // Fetch parent categories
-  const fetchParentCategories = async () => {
-    setIsLoading(true);
-    try {
-      const branch_id = JSON.parse(getCookie("data_user")).branch_id;
-      const response = await getListParentCategory({ status: -1, branch_id: branch_id });
-      if (response.data) {
-        setListParentCategories(response.data);
+  const { fetch: getListParentCategory, response: resListParentCategoriesResponse } = CategoryService.getListParentCategory();
+  const { fetch: getListChildCategory, response: resListChildCategory } = CategoryService.getListChildCategory();
+  const { fetch: getCategoryWithCode, response: resCategoryWithCode } = CategoryService.getCategoryWithCode();
+  useEffect(() => {
+    if (resListParentCategoriesResponse)
+      if (isSuccess(resListParentCategoriesResponse)) {
+        setListParentCategories(resListParentCategoriesResponse.data);
+        setIsLoading(false);
+        return;
       }
-    } catch (error) {
-      console.error("Error fetching parent categories:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Fetch current category by code
-  const fetchCurrentCategory = async (code: string) => {
-    setIsLoading(true);
-    try {
-      const response = await getCategoryWithCode(code);
-      if (response.data) {
-        setCurrentParentCategory(response.data);
+  }, [resListParentCategoriesResponse]);
+  useEffect(() => {
+    if (resListChildCategory)
+      if (isSuccess(resListChildCategory)) {
+        setListChildCategories(resListChildCategory.data.list);
+        setTotalRecordListChildCategories(resListChildCategory.data.total_record);
+        setRefresh(false);
+        setIsLoading(false);
+        return;
       }
-    } catch (error) {
-      console.error("Error fetching current category:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [resListChildCategory]);
 
-  // Fetch child categories
-  const fetchChildCategories = async (parentId: number, page: number, limit: number) => {
-    setIsLoading(true);
-    try {
-      const response = await getListChildCategory({
-        branch_id: JSON.parse(getCookie("data_user")).branch_id,
-        parent_id: parentId,
-        page,
-        limit,
-      });
-
-      if (response.data) {
-        setListChildCategories(response.data.list);
-        setTotalRecordListChildCategories(response.data.total_record);
+  useEffect(() => {
+    if (resCategoryWithCode)
+      if (isSuccess(resCategoryWithCode)) {
+        setCurrentParentCategory(resCategoryWithCode.data);
+        setIsLoading(false);
+        return;
       }
-    } catch (error) {
-      console.error("Error fetching child categories:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [resCategoryWithCode]);
 
   useEffect(() => {
     if (parentNameCategory) {
       if (!currentParentCategory || (parentNameCategory !== currentParentCategory.code && currentParentCategory !== null)) {
-        fetchCurrentCategory(parentNameCategory);
+        getCategoryWithCode(parentNameCategory);
       }
       return;
     }
 
-    setIsCallApiListParent(true);
     setCurrentParentCategory(null);
-    fetchParentCategories();
+    const branch_id = JSON.parse(getCookie("data_user")).branch_id;
+    getListParentCategory({ status: -1, branch_id: branch_id });
+    setRefresh(false);
   }, [location, parentNameCategory]);
 
   useEffect(() => {
@@ -122,72 +104,49 @@ const CategoryList = () => {
 
   useEffect(() => {
     if (currentParentCategory) {
-      fetchChildCategories(currentParentCategory.id, pageListChild, LIMIT);
+      getListChildCategory({
+        branch_id: JSON.parse(getCookie("data_user")).branch_id,
+        page: pageListChild,
+        limit: LIMIT,
+      });
     }
   }, [currentParentCategory, pageListChild]);
 
-  const handleOpenPopupCreate = () => {
-    setIsCreatePopupOpen(true);
-  };
+  useEffect(() => {
+    if (refresh) {
+      if (currentParentCategory) {
+        getListChildCategory({
+          branch_id: JSON.parse(getCookie("data_user")).branch_id,
+          page: pageListChild,
+          limit: LIMIT,
+        });
+      } else {
+        setCurrentParentCategory(null);
 
-  const handleOpenPopupChangeStatus = (category: ICategory) => {
-    setCategoryUpdate(category);
-    setIsChangeStatusPopupOpen(true);
-  };
-
-  const handleOpenPopupUpdate = (category: ICategory) => {
-    setCategoryUpdate(category);
-    setIsUpdatePopupOpen(true);
-  };
-
-  const handleClosePopupCreate = () => {
-    setIsCreatePopupOpen(false);
-    setPageListChild(1);
-    // Refresh data after creating
-    if (currentParentCategory) {
-      fetchChildCategories(currentParentCategory.id, pageListChild, LIMIT);
-    } else {
-      fetchParentCategories();
+        const branch_id = JSON.parse(getCookie("data_user")).branch_id;
+        getListParentCategory({ status: -1, branch_id: branch_id });
+      }
+      setRefresh(false);
     }
-  };
+  }, [refresh]);
 
   const backCategoryParent = () => {
     navigate(`/category`);
   };
 
-  const handleClosePopupUpdate = () => {
-    setIsUpdatePopupOpen(false);
-    // Refresh data after updating
-    if (currentParentCategory) {
-      fetchChildCategories(currentParentCategory.id, pageListChild, LIMIT);
-    } else {
-      fetchParentCategories();
-    }
-  };
-
-  const handleClosePopupChangeStatus = () => {
-    setIsChangeStatusPopupOpen(false);
-    // Refresh data after status change
-    if (currentParentCategory) {
-      fetchChildCategories(currentParentCategory.id, pageListChild, LIMIT);
-    } else {
-      fetchParentCategories();
-    }
-  };
-
-  const handleClickGoCategoryChild = (category: ICategory) => {
+  const handleClickGoCategoryChild = (category: CategoryResponse) => {
     setCurrentParentCategory(category);
     navigate(`/category/${category.code}`);
   };
 
-const handleChangePageListChild = (_: React.ChangeEvent<unknown>, value: number) => {
-  setPageListChild(value);
-};
+  const handleChangePageListChild = (_: React.ChangeEvent<unknown>, value: number) => {
+    setPageListChild(value);
+  };
 
   return (
     <>
       <div className="container-fluid">
-        <ButtonAddNew createPopup={handleOpenPopupCreate} title="Thêm danh mục" />
+        <ButtonAddNew createPopup={() => setIsCreatePopupOpen(true)} title="Thêm danh mục" />
         <div className="row">
           <div className="col-12">
             <div className="card mb-4">
@@ -217,7 +176,7 @@ const handleChangePageListChild = (_: React.ChangeEvent<unknown>, value: number)
                         </tr>
                       </thead>
                       <tbody>
-                        {showListCategory.map((category: ICategory) => (
+                        {showListCategory.map((category: CategoryResponse) => (
                           <tr key={category.id}>
                             <td>
                               <div className="d-flex px-2 py-1">
@@ -242,12 +201,29 @@ const handleChangePageListChild = (_: React.ChangeEvent<unknown>, value: number)
                               <Badge status={category.status}></Badge>
                             </td>
                             <td className="align-middle ">
-                              <EditButton functionProps={() => handleOpenPopupUpdate(category)}></EditButton>
+                              <EditButton
+                                functionProps={() => {
+                                  setDataObjectCategory(category);
+                                  setIsUpdatePopupOpen(true);
+                                }}
+                              ></EditButton>
                               {!currentParentCategory && <NavigationButton functionProps={() => handleClickGoCategoryChild(category)}></NavigationButton>}
                               {category.status == 1 ? (
-                                <ChangeStatusButton functionProps={() => handleOpenPopupChangeStatus(category)} icon={<CloseIcon style={{ color: "red" }} />} />
+                                <ChangeStatusButton
+                                  functionProps={() => {
+                                    setDataObjectCategory(category);
+                                    setIsChangeStatusPopupOpen(true);
+                                  }}
+                                  icon={<CloseIcon style={{ color: "red" }} />}
+                                />
                               ) : (
-                                <ChangeStatusButton functionProps={() => handleOpenPopupChangeStatus(category)} icon={<CheckIcon style={{ color: "green" }} />} />
+                                <ChangeStatusButton
+                                  functionProps={() => {
+                                    setDataObjectCategory(category);
+                                    setIsChangeStatusPopupOpen(true);
+                                  }}
+                                  icon={<CheckIcon style={{ color: "green" }} />}
+                                />
                               )}
                             </td>
                             <td className="align-middle text-center text-sm"></td>
@@ -276,16 +252,12 @@ const handleChangePageListChild = (_: React.ChangeEvent<unknown>, value: number)
         </div>
       </div>
 
-      {isCreatePopupOpen && (
-        <CreateCategoryPopup isCallApiListParent={isCallApiListParent} categories={listParentCategories} open={isCreatePopupOpen} onClose={handleClosePopupCreate} />
-      )}
+      {isCreatePopupOpen && <CreateCategoryPopup setRefresh={setRefresh} open={isCreatePopupOpen} setIsOpenCreate={setIsCreatePopupOpen} />}
 
-      {isUpdatePopupOpen && categoryUpdate && (
-        <UpdateCategoryPopup category={categoryUpdate} open={isUpdatePopupOpen} onClose={handleClosePopupUpdate}  />
-      )}
+      {isUpdatePopupOpen && <UpdateCategoryPopup category={dataObjectCategory} open={isUpdatePopupOpen} setIsOpenUpdate={setIsUpdatePopupOpen} setRefresh={setRefresh} />}
 
-      {isChangeStatusPopupOpen && categoryUpdate && (
-        <ChangeStatusCategoryPopup category={categoryUpdate} open={isChangeStatusPopupOpen} onClose={handleClosePopupChangeStatus} currentPage={pageListChild} />
+      {isChangeStatusPopupOpen && (
+        <ChangeStatusCategoryPopup category={dataObjectCategory} open={isChangeStatusPopupOpen} setIsOpen={setIsChangeStatusPopupOpen} setRefresh={setRefresh} />
       )}
     </>
   );

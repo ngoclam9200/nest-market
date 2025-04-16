@@ -25,4 +25,13 @@ export class CreateProductDto {
   @IsNumber({}, { each: true })
   @IsArray()
   list_media_id: number[];
+
+  @ApiProperty()
+  discount: number;
+
+  @ApiProperty()
+  unit: string;
+
+  @ApiProperty()
+  quantity: number;
 }

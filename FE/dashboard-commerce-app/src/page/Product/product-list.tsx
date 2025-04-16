@@ -1,23 +1,23 @@
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import TitleCard from "../../components/share/TitleCard/TitleCard";
 import Loading from "../../components/share/Loading/Loading";
-import { IProduct } from "../../interface/IProduct";
 import { formatDate } from "../../utils/FormatDateTime";
 import Badge from "../../components/share/Badge/Badge";
 import { Pagination, Stack } from "@mui/material";
 import NotFound from "../../components/share/NotFound/NotFound";
 import ButtonAddNew from "../../components/share/ButtonAddNew/ButtonAddNew";
- 
 import { isSuccess } from "../../services/base-response";
 import EditButton from "../../components/share/ButtonActionTable/EditButtion";
-import ChangeStatusButton from "../../components/share/ButtonActionTable/ChangeStatusButton";
 import Image from "../../components/share/Image/Image";
 import { getListProduct } from "../../services/product/product-service";
 import CreateProductPopup from "./product-popup/create-product-popup";
 import UpdateProductPopup from "./product-popup/update-product-popup";
-// import UpdateProductPopup from "./product-popup/update-product-popup";
- 
+import ChangeStatusProductPopup from "./product-popup/change-status-product-popup";
+import { ProductResponse } from "../../response/product";
+import ChangeStatusButton from "../../components/share/ButtonActionTable/ChangeStatusButton";
+import CloseIcon from "@mui/icons-material/Close";
+import CheckIcon from "@mui/icons-material/Check";
 
 const ProductList = () => {
   const domainMedia = import.meta.env.VITE_API_DOMAIN + import.meta.env.VITE_API_MEDIA_PORT + "/";
@@ -25,9 +25,9 @@ const ProductList = () => {
   const [isCreatePopupOpen, setIsCreatePopupOpen] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const [isUpdatePopupOpen, setIsUpdatePopupOpen] = useState(false);
-  // const [isChangeStatusPopupOpen, setIsChangeStatusPopupOpen] = useState(false);
-  const [dataObjectProduct, setDataObjectProduct] = useState<IProduct | null>(null);
-  const [products, setProducts] = useState<IProduct[]>([]);
+  const [isChangeStatusPopupOpen, setIsChangeStatusPopupOpen] = useState(false);
+  const [dataObjectProduct, setDataObjectProduct] = useState<ProductResponse>(new ProductResponse());
+  const [products, setProducts] = useState<ProductResponse[]>([]);
   const [totalRecord, setTotalRecord] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -40,11 +40,12 @@ const ProductList = () => {
   const loadProducts = async () => {
     setIsLoading(true);
     try {
-      const response = await getListProduct({page, limit:LIMIT});
+      const response = await getListProduct({ page, limit: LIMIT });
 
       if (isSuccess(response)) {
         setProducts(response.data.list);
         setTotalRecord(response.data.total_record);
+        setRefresh(false);
       }
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -55,38 +56,12 @@ const ProductList = () => {
 
   useEffect(() => {
     loadProducts();
-  }, [page, location , refresh]);
-
-  // const handleOpenPopupCreate = () => {
-  //   setIsCreatePopupOpen(true);
-  // };
-
-  // const handleClosePopupCreate = () => {
-  //   setIsCreatePopupOpen(false);
-  //   loadProducts(); // Reload products after creation
-  // };
-
-  // const handleOpenPopupUpdate = (product: IProduct) => {
-  //   setProductUpdate(product);
-  //   setIsUpdatePopupOpen(true);
-  // };
-
-  // const handleClosePopupUpdate = () => {
-  //   setIsUpdatePopupOpen(false);
-  //   setProductUpdate(null);
-  //   loadProducts(); // Reload products after update
-  // };
-
-  // const handleOpenPopupChangeStatus = (product: IProduct) => {
-  //   setProductUpdate(product);
-  //   setIsChangeStatusPopupOpen(true);
-  // };
-
-  // const handleClosePopupChangeStatus = () => {
-  //   setIsChangeStatusPopupOpen(false);
-  //   setProductUpdate(null);
-  //   loadProducts(); // Reload products after status change
-  // };
+  }, [page, location, refresh]);
+  useEffect(() => {
+    if (refresh) {
+      loadProducts();
+    }
+  }, [refresh]);
 
   const handleChangePage = (_: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
@@ -120,11 +95,11 @@ const ProductList = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {products.map((product: IProduct) => (
+                        {products.map((product: ProductResponse) => (
                           <tr key={product.id}>
                             <td>
                               <div className="d-flex px-2 py-1">
-                                <div>{product.media && <Image src={domainMedia + product.media.url} alt={product.name} className="avatar avatar-sm me-3" />}</div>
+                                <div>{product.media && <Image src={domainMedia + product.media_default.url} alt={product.name} className="avatar avatar-sm me-3" />}</div>
                                 <div className="d-flex flex-column justify-content-center">
                                   <h6 className="mb-0 text-sm">{product.name}</h6>
                                 </div>
@@ -143,11 +118,30 @@ const ProductList = () => {
                               <Badge status={product.status}></Badge>
                             </td>
                             <td className="align-middle">
-            
-                              <EditButton functionProps={() => {
-                                setDataObjectProduct(product);
-                                setIsUpdatePopupOpen(true)}}></EditButton>
-                              {/* <ChangeStatusButton onClick={() => handleOpenPopupChangeStatus(product)} status={product.status} /> */}
+                              <EditButton
+                                functionProps={() => {
+                                  setDataObjectProduct(product);
+                                  setIsUpdatePopupOpen(true);
+                                }}
+                              ></EditButton>
+
+                              {product.status == 1 ? (
+                                <ChangeStatusButton
+                                  functionProps={() => {
+                                    setIsChangeStatusPopupOpen(true);
+                                    setDataObjectProduct(product);
+                                  }}
+                                  icon={<CloseIcon style={{ color: "red" }} />}
+                                />
+                              ) : (
+                                <ChangeStatusButton
+                                  functionProps={() => {
+                                    setDataObjectProduct(product);
+                                    setIsChangeStatusPopupOpen(true);
+                                  }}
+                                  icon={<CheckIcon style={{ color: "green" }} />}
+                                />
+                              )}
                             </td>
                           </tr>
                         ))}
@@ -169,9 +163,11 @@ const ProductList = () => {
 
       {isCreatePopupOpen && <CreateProductPopup setRefresh={setRefresh} open={isCreatePopupOpen} setIsOpenCreate={setIsCreatePopupOpen} />}
 
-      {isUpdatePopupOpen && <UpdateProductPopup setIsOpenUpdate={setIsUpdatePopupOpen}  product={dataObjectProduct} open={isUpdatePopupOpen} setRefresh={setRefresh}  />}
+      {isUpdatePopupOpen && <UpdateProductPopup setIsOpenUpdate={setIsUpdatePopupOpen} productId={dataObjectProduct.id} open={isUpdatePopupOpen} setRefresh={setRefresh} />}
 
-      {/* {isChangeStatusPopupOpen && productUpdate && <ChangeStatusProductPopup product={productUpdate} open={isChangeStatusPopupOpen} onClose={handleClosePopupChangeStatus} />} */}
+      {isChangeStatusPopupOpen && (
+        <ChangeStatusProductPopup open={isChangeStatusPopupOpen} setIsOpenChangeStatus={setIsChangeStatusPopupOpen} product={dataObjectProduct} setRefresh={setRefresh} />
+      )}
     </>
   );
 };

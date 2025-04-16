@@ -2,36 +2,39 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsInt, IsNotEmpty, IsNumber } from 'class-validator';
 
-export class UpdateProductDto  {
+export class UpdateProductDto {
+  @ApiProperty()
+  @IsInt()
+  @IsNotEmpty({ message: 'Id không được để trống' })
+  id: number;
 
+  @ApiProperty()
+  category_id: number;
 
-    @ApiProperty()
-    @IsInt()
-    @IsNotEmpty({ message: 'Id không được để trống' })
-    id: number;
+  @ApiProperty()
+  @IsNotEmpty({ message: 'Tên không được để trống' })
+  name: string;
 
-    @ApiProperty()
-    category_id: number;
+  @ApiProperty()
+  description: string;
 
-    @ApiProperty()
-    @IsNotEmpty({ message: 'Tên không được để trống' })
-    name: string;
+  @ApiProperty()
+  price: number;
 
-    @ApiProperty()
-    description: string;
+  @ApiProperty()
+  default_media_id: number;
 
-    @ApiProperty()
-    price: number;
+  @ApiProperty()
+  @IsNumber({}, { each: true })
+  @IsArray()
+  list_media_id: number[];
 
-    @ApiProperty()
-    default_media_id: number;
+  @ApiProperty()
+  discount: number;
 
-    @ApiProperty()
-    @IsNumber({}, { each: true }) 
-    @IsArray()  
-    list_media_id: number[];
+  @ApiProperty()
+  unit: string;
 
-    
-
-
+  @ApiProperty()
+  quantity: number;
 }

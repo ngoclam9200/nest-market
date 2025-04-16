@@ -16,3 +16,10 @@ export const setCookie = (
 export const getCookie = (key: string): any => {
   return Cookies.get(key);
 };
+
+export const deleteCookie = (key: string): any => {
+  return Cookies.remove(key);
+};
+
+
+
