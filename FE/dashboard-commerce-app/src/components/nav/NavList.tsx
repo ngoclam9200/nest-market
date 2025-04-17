@@ -3,6 +3,7 @@ import CategoryIcon from "@mui/icons-material/Category";
 import LogoutIcon from "@mui/icons-material/Logout";
 import Inventory2Icon from "@mui/icons-material/Inventory2";
 import NavItem from "./NavItem";
+import ImageIcon from "@mui/icons-material/Image";
 
 const NavList = () => {
   return (
@@ -21,10 +22,11 @@ const NavList = () => {
             <NavItem url="/dashboard" title="Trang chủ" Icon={HomeIcon} />
             <NavItem url="/category" title="Danh mục " Icon={CategoryIcon} />
             <NavItem url="/product" title="Sản phẩm" Icon={Inventory2Icon} />
+            <NavItem url="/banner" title="Banner" Icon={ImageIcon} />
             <NavItem url="/login" title="Log out" Icon={LogoutIcon} />
           </ul>
         </div>
-        <div className="sidenav-footer mx-3 ">
+        {/* <div className="sidenav-footer mx-3 ">
           <div className="card card-background shadow-none card-background-mask-secondary" id="sidenavCard">
             <div
               className="full-background"
@@ -48,7 +50,7 @@ const NavList = () => {
           <a className="btn bg-gradient-primary mt-4 w-100" href="https://www.creative-tim.com/product/soft-ui-dashboard-pro?ref=sidebarfree" type="button">
             Upgrade to pro
           </a>
-        </div>
+        </div> */}
       </aside>
     </>
   );

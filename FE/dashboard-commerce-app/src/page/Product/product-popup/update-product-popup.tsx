@@ -6,14 +6,14 @@ import * as Yup from "yup";
 import { HttpStatusCode } from "axios";
 import Popup from "../../../components/share/Popup/Popup";
 import Toast from "../../../components/share/Toast/Toast";
-import { getAllChildCategory } from "../../../services/category/category-service";
-import { getCookie } from "../../../services/cookie";
 import { upload } from "../../../services/media/media-service";
-import { getDetailProduct, updateProduct } from "../../../services/product/product-service";
+import { ProductService } from "../../../services/product/product-service";
 import { removeNonNumeric, formatCurrency } from "../../../utils/FormatCurrency";
 import { CategoryResponse } from "../../../response/category";
 import { MediaResponse } from "../../../response/media";
 import { ProductResponse } from "../../../response/product";
+import { CategoryService } from "../../../services/category/category-service";
+import { isSuccess } from "../../../services/base-response";
 
 interface UpdateProductProps {
   open: boolean;
@@ -38,10 +38,14 @@ const UpdateProductPopup: React.FC<UpdateProductProps> = ({ open, setRefresh, se
   const [existingImages, setExistingImages] = useState<MediaResponse[]>([]);
   const [listCategory, setListCategory] = useState<CategoryResponse[]>([]);
   const [error, setError] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
+ 
   const [productData, setProductData] = useState<ProductResponse>(new ProductResponse());
   const formikRef = useRef<any>(null);
   const domainMedia = import.meta.env.VITE_API_DOMAIN + import.meta.env.VITE_API_MEDIA_PORT + "/";
+
+  const { fetch: getAllChildCategory, response: listCategoryResponse } = CategoryService.getAllChildCategory();
+  const { fetch: getDetailProduct, response: resDetail , loading :loading } = ProductService.getDetailProduct();
+  const { fetch: updateProduct, response: resUpdate } = ProductService.updateProduct();
 
   const initialValues: ProductFormValues = {
     id: productData?.id || 0,
@@ -64,43 +68,50 @@ const UpdateProductPopup: React.FC<UpdateProductProps> = ({ open, setRefresh, se
 
   useEffect(() => {
     if (open && productId) {
-      fetchProductData();
-      fetchCategories();
+      getDetailProduct(productId);
+      getAllChildCategory();
     }
   }, [open, productId]);
 
-  const fetchProductData = async () => {
-    setLoading(true);
-    try {
-      const response = await getDetailProduct(productId);
-      if (response.status === HttpStatusCode.Ok && response.data) {
-        setProductData(response.data);
+  useEffect(() => {
+    if (listCategoryResponse) {
+      if (isSuccess(listCategoryResponse)) {
+        setListCategory(listCategoryResponse.data);
+      } else {
+        Toast.ToastError(listCategoryResponse.message);
+      }
+    }
+  }, [listCategoryResponse]);
+  useEffect(() => {
+    if (resDetail) {
+      if (isSuccess(resDetail)) {
+        setProductData(resDetail.data);
 
         // Set existing images if available
-        if (response.data.media && response.data.media.length > 0) {
-          setExistingImages(response.data.media);
+        if (resDetail.data.media && resDetail.data.media.length > 0) {
+          setExistingImages(resDetail.data.media);
         }
       } else {
-        setError("Không thể tải thông tin sản phẩm");
+        Toast.ToastError(resDetail.message);
       }
-    } catch (err) {
-      setError("Đã xảy ra lỗi khi tải thông tin sản phẩm");
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [resDetail]);
 
-  const fetchCategories = async () => {
-    try {
-      let response = await getAllChildCategory({
-        status: 1,
-        branch_id: JSON.parse(getCookie("data_user")).branch_id,
-      });
-      setListCategory(response.data);
-    } catch (err) {
-      setError("Không thể tải danh mục sản phẩm");
+  useEffect(() => {
+    if (resUpdate) {
+      if (isSuccess(resUpdate)) {
+        Toast.ToastSuccess("Cập nhật sản phẩm thành công");
+        setRefresh(true);
+
+        setImage(null);
+        setExistingImages([]);
+        setError("");
+        setIsOpenUpdate(false);
+      } else {
+        Toast.ToastError(resUpdate.message);
+      }
     }
-  };
+  }, [resUpdate]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -122,48 +133,38 @@ const UpdateProductPopup: React.FC<UpdateProductProps> = ({ open, setRefresh, se
     setExistingImages(updatedImages);
   };
 
-  const handleSubmit = async (values: ProductFormValues, { resetForm }: FormikHelpers<ProductFormValues>) => {
-    try {
-      if (!existingImages.length && (!image || image.length === 0)) {
-        setError("Vui lòng chọn hình ảnh");
+  const handleSubmit = async (values: ProductFormValues, {}: FormikHelpers<ProductFormValues>) => {
+    if (!existingImages.length && (!image || image.length === 0)) {
+      setError("Vui lòng chọn hình ảnh");
+      return;
+    }
+
+    let list_media_id = existingImages.map((media) => media.id);
+
+    // Upload new images if any
+    if (image && image.length > 0) {
+      const responseMedia = await upload(image, 1);
+      if (responseMedia.status === HttpStatusCode.Ok) {
+        const new_media_ids = responseMedia.data.map((md: MediaResponse) => md.id);
+        list_media_id = [...list_media_id, ...new_media_ids];
+      } else {
+        setError(responseMedia.message);
         return;
       }
-
-      let list_media_id = existingImages.map((media) => media.id);
-      let default_media_id = existingImages.length > 0 ? existingImages[0].id : 0;
-
-      // Upload new images if any
-      if (image && image.length > 0) {
-        const responseMedia = await upload(image, 1);
-        if (responseMedia.status === HttpStatusCode.Ok) {
-          default_media_id = responseMedia.data[0].id;
-          const new_media_ids = responseMedia.data.map((md: MediaResponse) => md.id);
-          list_media_id = [...list_media_id, ...new_media_ids];
-        } else {
-          setError(responseMedia.message);
-          return;
-        }
-      }
-
-      const price_product = Number(removeNonNumeric(values.price));
-
-      // Update updateProduct function to include discount and unit
-      const response = await updateProduct(values.id, values.name, values.description, values.categoryId, list_media_id, values.discount, values.unit, price_product, values.quantity);
-
-      if (response.status === HttpStatusCode.Ok) {
-        Toast.ToastSuccess("Cập nhật sản phẩm thành công");
-        setRefresh(true);
-        resetForm();
-        setImage(null);
-        setExistingImages([]);
-        setError("");
-        setIsOpenUpdate(false);
-      } else {
-        setError(response.message);
-      }
-    } catch (err) {
-      setError("Cập nhật sản phẩm thất bại. Vui lòng thử lại.");
     }
+
+    const price_product = Number(removeNonNumeric(values.price));
+    updateProduct({
+      id: values.id,
+      name: values.name,
+      description: values.description,
+      category_id: values.categoryId,
+      discount: values.discount,
+      unit: values.unit,
+      price: price_product,
+      quantity: values.quantity,
+      list_media_id: list_media_id,
+    });
   };
 
   // This function will be called when the Popup's submit button is clicked

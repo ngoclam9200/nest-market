@@ -4,79 +4,63 @@ import * as Yup from "yup";
 import { HttpStatusCode } from "axios";
 import Popup from "../../../components/share/Popup/Popup";
 import Toast from "../../../components/share/Toast/Toast";
-import { CategoryResponse } from "../../../response/category";
-import { getCookie } from "../../../services/cookie";
+import { BannerResponse } from "../../../response/banner";
 import { MediaResponse } from "../../../response/media";
 import { upload } from "../../../services/media/media-service";
-import { CategoryService } from "../../../services/category/category-service";
+import { BannerService } from "../../../services/banner/banner-service";
 import { isSuccess } from "../../../services/base-response";
 
-interface UpdateCategoryProps {
+interface UpdateBannerProps {
   open: boolean;
   setIsOpenUpdate: (value: boolean) => void;
   setRefresh: (value: boolean) => void;
-  category: CategoryResponse | null;
+  banner: BannerResponse | null;
 }
 
-interface CategoryFormValues {
+interface BannerFormValues {
   name: string;
   description: string;
-  parent_id?: number;
+  title: string;
   media_id: number;
 }
 
-const UpdateCategoryPopup: React.FC<UpdateCategoryProps> = ({ open, setRefresh, setIsOpenUpdate, category }) => {
+const UpdateBannerPopup: React.FC<UpdateBannerProps> = ({ open, setRefresh, setIsOpenUpdate, banner }) => {
   const [error, setError] = useState<string>("");
   const formikRef = useRef<any>(null);
-  const [listParentCategories, setListParentCategories] = useState<CategoryResponse[]>([]);
   const [uploadedMedia, setUploadedMedia] = useState<MediaResponse[]>([]);
-  const { fetch: updateCategory, response: resUpdate } = CategoryService.updateCategory();
-  const { fetch: getCategoryParent, response: resCategoryparent } = CategoryService.getListParentCategory();
-  // Initialize form values from category data
-  const getInitialValues = (): CategoryFormValues => {
-    if (!category) {
+  const { fetch: updateBanner, response: resUpdate } = BannerService.updateBanner();
+  const domainMedia = import.meta.env.VITE_API_DOMAIN + import.meta.env.VITE_API_MEDIA_PORT + "/";
+  // Initialize form values from banner data
+  const getInitialValues = (): BannerFormValues => {
+    if (!banner) {
       return {
         name: "",
         description: "",
-        parent_id: 0,
+        title: "",
         media_id: 0,
       };
     }
 
     return {
-      name: category.name || "",
-      description: category.description || "",
-      parent_id: category.parent_id || 0,
-      media_id: category.media?.id || 0,
+      name: banner.name || "",
+      description: banner.description || "",
+      title: banner.title || "",
+      media_id: banner.media?.id || 0,
     };
   };
 
   const validationSchema = Yup.object({
-    name: Yup.string().required("Vui lòng nhập tên danh mục"),
+    name: Yup.string().required("Vui lòng nhập tên banner"),
     media_id: Yup.number().min(1, "Vui lòng chọn hình ảnh").required("Vui lòng chọn hình ảnh"),
+    title: Yup.string().required("Vui lòng nhập tiêu đề"),
   });
 
-  useEffect(() => {
-    if (open) {
-      getCategoryParent({ status: 1, branch_id: JSON.parse(getCookie("data_user")).branch_id });
-    }
-  }, [open, category]);
-
-  useEffect(() => {
-    if (resCategoryparent) {
-      if (isSuccess(resCategoryparent)) {
-        setListParentCategories(resCategoryparent.data);
-      } else {
-        Toast.ToastError(resCategoryparent.message);
-      }
-    }
-  }, [resCategoryparent]);
   useEffect(() => {
     if (resUpdate) {
       if (isSuccess(resUpdate)) {
         setRefresh(true);
         setIsOpenUpdate(false);
-        Toast.ToastSuccess("Cập nhật danh mục thành công");
+        Toast.ToastSuccess("Cập nhật banner thành công");
       } else {
         Toast.ToastError(resUpdate.message);
       }
@@ -109,16 +93,16 @@ const UpdateCategoryPopup: React.FC<UpdateCategoryProps> = ({ open, setRefresh, 
     }
   };
 
-  const handleSubmit = async (values: CategoryFormValues, {}: FormikHelpers<CategoryFormValues>) => {
-    if (!category) {
-      setError("Không tìm thấy thông tin danh mục");
+  const handleSubmit = async (values: BannerFormValues, {}: FormikHelpers<BannerFormValues>) => {
+    if (!banner) {
+      setError("Không tìm thấy thông tin banner");
       return;
     }
-    updateCategory({
-      id: category.id,
+    updateBanner({
+      id: banner.id,
       name: values.name,
       description: values.description,
-      branch_id: JSON.parse(getCookie("data_user")).branch_id,
+      title: values.title,
       media_id: values.media_id,
     });
   };
@@ -132,7 +116,7 @@ const UpdateCategoryPopup: React.FC<UpdateCategoryProps> = ({ open, setRefresh, 
 
   return (
     <Popup
-      title="Cập nhật danh mục"
+      title="Cập nhật banner"
       open={open}
       onClose={() => {
         setIsOpenUpdate(false);
@@ -144,13 +128,13 @@ const UpdateCategoryPopup: React.FC<UpdateCategoryProps> = ({ open, setRefresh, 
         <Formik initialValues={getInitialValues()} validationSchema={validationSchema} onSubmit={handleSubmit} innerRef={formikRef} enableReinitialize={true}>
           {({ handleChange }) => (
             <Form>
-              <label>Tên danh mục</label>
+              <label>Tên banner</label>
               <div className="mb-3">
                 <Field
                   type="text"
                   name="name"
                   className="form-control"
-                  placeholder="Tên danh mục"
+                  placeholder="Tên banner"
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     setError("");
                     handleChange(e);
@@ -158,28 +142,19 @@ const UpdateCategoryPopup: React.FC<UpdateCategoryProps> = ({ open, setRefresh, 
                 />
                 <ErrorMessage name="name" component="div" className="text-danger" />
               </div>
-
-              <label>Danh mục cha</label>
+              <label>Tiêu đề</label>
               <div className="mb-3">
                 <Field
-                  as="select"
-                  name="parent_id"
+                  type="text"
+                  name="title"
                   className="form-control"
-                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                  placeholder="Tiêu đề"
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     setError("");
                     handleChange(e);
                   }}
-                >
-                  <option value="0">Không có danh mục cha</option>
-                  {listParentCategories.map((parentCategory) =>
-                    // Don't allow selecting the current category as its own parent
-                    category && parentCategory.id !== category.id ? (
-                      <option key={parentCategory.id} value={parentCategory.id}>
-                        {parentCategory.name}
-                      </option>
-                    ) : null
-                  )}
-                </Field>
+                />
+                <ErrorMessage name="title" component="div" className="text-danger" />
               </div>
 
               <label>Hình ảnh</label>
@@ -190,7 +165,12 @@ const UpdateCategoryPopup: React.FC<UpdateCategoryProps> = ({ open, setRefresh, 
 
                 {uploadedMedia.length > 0 && (
                   <div className="mt-2">
-                    <img src={uploadedMedia[0].url} alt="Category preview" style={{ maxWidth: "100%", maxHeight: "200px" }} />
+                    <img src={uploadedMedia[0].url} alt="Banner preview" style={{ width: "100%", maxHeight: "200px" }} />
+                  </div>
+                )}
+                {uploadedMedia.length === 0 && (
+                  <div className="mt-2  ">
+                    <img src={domainMedia + banner?.media.url} alt="Banner preview" style={{ width: "100%", maxHeight: "200px" }} />
                   </div>
                 )}
               </div>
@@ -223,4 +203,4 @@ const UpdateCategoryPopup: React.FC<UpdateCategoryProps> = ({ open, setRefresh, 
   );
 };
 
-export default UpdateCategoryPopup;
+export default UpdateBannerPopup;

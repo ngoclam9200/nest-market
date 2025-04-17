@@ -28,7 +28,23 @@ export const API_CATEGORY_URL = {
   },
   CHANGE_STATUS_CATEGORY() {
     return "/categories/change-status";
-  }
+  },
+};
+
+export const API_BANNER_URL = {
+  get GET_ALL_BANNER() {
+    return "/banner";
+  },
+  get CREATE_BANNER() {
+    return "/banner/create";
+  },
+  get UPDATE_BANNER() {
+    return "/banner/update";
+  },
+
+  CHANGE_STATUS_BANNER() {
+    return "/banner/change-status";
+  },
 };
 
 export const API_PRODUCT_URL = {

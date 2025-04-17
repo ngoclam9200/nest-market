@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Popup from "../../../components/share/Popup/Popup";
 import { ProductResponse } from "../../../response/product";
-import { changeStatusProduct } from "../../../services/product/product-service";
-import { HttpStatusCode } from "axios";
 import Toast from "../../../components/share/Toast/Toast";
+import { ProductService } from "../../../services/product/product-service";
+import { isSuccess } from "../../../services/base-response";
 
 interface ChangeStatusProductPopup {
   open: boolean;
@@ -13,21 +13,21 @@ interface ChangeStatusProductPopup {
 }
 
 const ChangeStatusProductPopup: React.FC<ChangeStatusProductPopup> = ({ open, setIsOpenChangeStatus, product, setRefresh }) => {
+  const { fetch: changeStatusProduct, response: resChangeStatus } = ProductService.changeStatusProduct();
   const handleSubmit = async () => {
-    try {
-      let status = product.status === 0 ? 1 : 0;
-      const response = await changeStatusProduct(product.id, status);
-      if (response.status == HttpStatusCode.Ok) {
+    changeStatusProduct({ id: product.id, status: product.status === 1 ? 0 : 1 });
+  };
+  useEffect(() => {
+    if (resChangeStatus) {
+      if (isSuccess(resChangeStatus)) {
         product.status == 1 ? Toast.ToastSuccess("Tạm ngưng sản phẩm thành công") : Toast.ToastSuccess("Bật hoạt động sản phẩm thành công");
         setIsOpenChangeStatus(false);
         setRefresh(true);
       } else {
-        Toast.ToastError(response.message);
+        Toast.ToastError(resChangeStatus.message);
       }
-    } catch (err) {
-    } finally {
     }
-  };
+  }, [resChangeStatus]);
 
   return (
     <Popup
@@ -36,12 +36,10 @@ const ChangeStatusProductPopup: React.FC<ChangeStatusProductPopup> = ({ open, se
       onClose={() => {
         setIsOpenChangeStatus(false);
       }}
-      
       onSubmit={handleSubmit}
       submitText="Xác nhận"
       cancelText="Huỷ"
       maxWidth="xs"
-      
     >
       <p>{product.status == 1 ? "Tạm ngưng sản phẩm này " : "Bật hoạt động sản phẩm này"}</p>
     </Popup>

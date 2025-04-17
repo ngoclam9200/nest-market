@@ -8,6 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 import ProductList from "./page/Product/product-list";
 import "./assets/styles.scss"
 import Home from "./page/Home/home";
+import BannerList from "./page/banner/banner-list";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
               </Route>
             </Route>
             <Route path="/product" element={<ProductList />} />
+            <Route path="/banner" element={<BannerList />} />
           </Routes>
         </Layout>
         <ToastContainer />

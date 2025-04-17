@@ -13,6 +13,7 @@ import { config } from 'dotenv';
 import { ProductsModule } from './products/products.module';
 import { grpcMediaClientOptions, grpcUserClientOptions } from './grpc/grpc-client.options';
 import { ConfigModule } from '@nestjs/config';
+import { BannerModule } from './banner/banner.module';
 config()
 @Module({
   imports: [ 
@@ -38,7 +39,8 @@ config()
     ConfigModule.forRoot({
       isGlobal: true, // Điều này sẽ làm cho ConfigService khả dụng toàn cầu
     }),
-    ProductsModule
+    ProductsModule, 
+    BannerModule,
    ],
 
   controllers: [AppController],

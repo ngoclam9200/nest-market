@@ -3,16 +3,16 @@ import CloseIcon from "@mui/icons-material/Close";
 import { Box, Button, Grid } from "@mui/material";
 import { Formik, Form, Field, ErrorMessage, FormikHelpers } from "formik";
 import * as Yup from "yup";
-import { HttpStatusCode } from "axios";
 import Popup from "../../../components/share/Popup/Popup";
 import Toast from "../../../components/share/Toast/Toast";
-import { getAllChildCategory } from "../../../services/category/category-service";
 import { getCookie } from "../../../services/cookie";
 import { upload } from "../../../services/media/media-service";
-import { createProduct } from "../../../services/product/product-service";
+import { ProductService } from "../../../services/product/product-service";
 import { removeNonNumeric, formatCurrency } from "../../../utils/FormatCurrency";
 import { CategoryResponse } from "../../../response/category";
 import { MediaResponse } from "../../../response/media";
+import { CategoryService } from "../../../services/category/category-service";
+import { isSuccess } from "../../../services/base-response";
 
 interface CreateProductProps {
   open: boolean;
@@ -36,6 +36,8 @@ const CreateProductPopup: React.FC<CreateProductProps> = ({ open, setRefresh, se
   const [error, setError] = useState<string>("");
   // Use useRef instead of useState to avoid re-renders
   const formikRef = useRef<any>(null);
+  const { fetch: getAllChildCategory, response: resCategory } = CategoryService.getAllChildCategory();
+  const { fetch: createProduct, response: resCreate } = ProductService.createProduct();
 
   const initialValues: ProductFormValues = {
     name: "",
@@ -57,16 +59,31 @@ const CreateProductPopup: React.FC<CreateProductProps> = ({ open, setRefresh, se
 
   useEffect(() => {
     if (open) {
-      const fetchDataListCategory = async () => {
-        let response = await getAllChildCategory({
-          status: 1,
-          branch_id: JSON.parse(getCookie("data_user")).branch_id,
-        });
-        setListCategory(response.data);
-      };
-      fetchDataListCategory();
+      getAllChildCategory();
     }
   }, [open]);
+  useEffect(() => {
+    if (resCategory) {
+      if (isSuccess(resCategory)) {
+        setListCategory(resCategory.data);
+      } else {
+        Toast.ToastError(resCategory.message);
+      }
+    }
+  });
+  useEffect(() => {
+    if (resCreate) {
+      if (isSuccess(resCreate)) {
+        Toast.ToastSuccess("Thêm sản phẩm thành công");
+        setRefresh(true);
+        setImage(null);
+        setError("");
+        setIsOpenCreate(false);
+      } else {
+        Toast.ToastError(resCreate.message);
+      }
+    }
+  });
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -83,50 +100,27 @@ const CreateProductPopup: React.FC<CreateProductProps> = ({ open, setRefresh, se
     }
   };
 
-  const handleSubmit = async (values: ProductFormValues, { resetForm }: FormikHelpers<ProductFormValues>) => {
-    try {
-      if (!image || image.length === 0) {
-        setError("Vui lòng chọn hình ảnh");
-        return;
-      }
-
-      const responseMedia = await upload(image, 1);
-      if (responseMedia.status === HttpStatusCode.Ok) {
-        const default_media_id = responseMedia.data[0].id;
-        const price_product = Number(removeNonNumeric(values.price));
-        const list_media_id = responseMedia.data.map((md: MediaResponse) => md.id);
-        const branch_id = JSON.parse(getCookie("data_user")).branch_id;
-
-        // Update createProduct function to include discount and unit
-        const response = await createProduct(
-          values.name,
-          values.description,
-          values.categoryId,
-          price_product,
-          branch_id,
-          default_media_id,
-          list_media_id,
-          values.discount,
-          values.unit,
-          values.quantity
-        );
-
-        if (response.status === HttpStatusCode.Ok) {
-          Toast.ToastSuccess("Thêm sản phẩm thành công");
-          setRefresh(true);
-          resetForm();
-          setImage(null);
-          setError("");
-          setIsOpenCreate(false);
-        } else {
-          setError(response.message);
-        }
-      } else {
-        setError(responseMedia.message);
-      }
-    } catch (err) {
-      setError("Thêm sản phẩm thất bại. Vui lòng thử lại.");
+  const handleSubmit = async (values: ProductFormValues, {}: FormikHelpers<ProductFormValues>) => {
+    if (!image || image.length === 0) {
+      setError("Vui lòng chọn hình ảnh");
+      return;
     }
+    const responseMedia = await upload(image, 1);
+    const default_media_id = responseMedia.data[0].id;
+    const price_product = Number(removeNonNumeric(values.price));
+    const list_media_id = responseMedia.data.map((md: MediaResponse) => md.id);
+    createProduct({
+      name: values.name,
+      description: values.description,
+      category_id: values.categoryId,
+      price: price_product,
+      branch_id: JSON.parse(getCookie("data_user")).branch_id,
+      default_media_id: default_media_id,
+      list_media_id: list_media_id,
+      discount: values.discount,
+      unit: values.unit,
+      quantity: values.quantity,
+    });
   };
 
   // This function will be called when the Popup's submit button is clicked

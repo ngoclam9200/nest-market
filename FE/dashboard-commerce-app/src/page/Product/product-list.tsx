@@ -10,7 +10,7 @@ import ButtonAddNew from "../../components/share/ButtonAddNew/ButtonAddNew";
 import { isSuccess } from "../../services/base-response";
 import EditButton from "../../components/share/ButtonActionTable/EditButtion";
 import Image from "../../components/share/Image/Image";
-import { getListProduct } from "../../services/product/product-service";
+
 import CreateProductPopup from "./product-popup/create-product-popup";
 import UpdateProductPopup from "./product-popup/update-product-popup";
 import ChangeStatusProductPopup from "./product-popup/change-status-product-popup";
@@ -18,6 +18,8 @@ import { ProductResponse } from "../../response/product";
 import ChangeStatusButton from "../../components/share/ButtonActionTable/ChangeStatusButton";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckIcon from "@mui/icons-material/Check";
+import { ProductService } from "../../services/product/product-service";
+import Toast from "../../components/share/Toast/Toast";
 
 const ProductList = () => {
   const domainMedia = import.meta.env.VITE_API_DOMAIN + import.meta.env.VITE_API_MEDIA_PORT + "/";
@@ -29,7 +31,8 @@ const ProductList = () => {
   const [dataObjectProduct, setDataObjectProduct] = useState<ProductResponse>(new ProductResponse());
   const [products, setProducts] = useState<ProductResponse[]>([]);
   const [totalRecord, setTotalRecord] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
+
+  const { fetch: getListProduct, response: resListProduct, loading: isLoading } = ProductService.getListProduct();
 
   // const navigate = useNavigate();
   const location = useLocation();
@@ -37,31 +40,26 @@ const ProductList = () => {
   const LIMIT = 10;
   const [page, setPage] = useState(1);
 
-  const loadProducts = async () => {
-    setIsLoading(true);
-    try {
-      const response = await getListProduct({ page, limit: LIMIT });
-
-      if (isSuccess(response)) {
-        setProducts(response.data.list);
-        setTotalRecord(response.data.total_record);
-        setRefresh(false);
-      }
-    } catch (error) {
-      console.error("Error fetching products:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
-    loadProducts();
-  }, [page, location, refresh]);
+    getListProduct({ page, limit: LIMIT });
+  }, [page, location]);
   useEffect(() => {
     if (refresh) {
-      loadProducts();
+      getListProduct({ page, limit: LIMIT });
     }
   }, [refresh]);
+
+  useEffect(() => {
+    if (resListProduct) {
+      if (isSuccess(resListProduct)) {
+        setProducts(resListProduct.data.list);
+        setTotalRecord(resListProduct.data.total_record);
+        setRefresh(false);
+      } else {
+        Toast.ToastError(resListProduct.message);
+      }
+    }
+  }, [resListProduct]);
 
   const handleChangePage = (_: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
