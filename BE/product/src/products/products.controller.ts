@@ -10,7 +10,7 @@ import {
   UseFilters,
   UseGuards,
 } from '@nestjs/common';
-import { MessagePattern, Payload } from '@nestjs/microservices';
+
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { HttpExceptionFilter } from 'src/utils/exceptions/http.exception';
@@ -45,12 +45,13 @@ export class ProductsController {
     @Query() findAllProductDTO: FindAllProductDTO,
     @CurrentUser() currentUser: UserResponse,
   ): Promise<ApiResponse<PaginatedResponse<ProductResponse>>> {
-    const { page, limit, status } = findAllProductDTO;
+    const { page, limit, status , category_id } = findAllProductDTO;
     try {
       return await this.productsService.findAllProduct(
         page,
         limit,
         status,
+        category_id,
         currentUser,
       );
     } catch (error) {
@@ -58,7 +59,24 @@ export class ProductsController {
     }
   }
 
-  @Get(':id')
+  @Get('newest')
+  async getNewestProducts(
+    @Query('count') count: number,
+    @CurrentUser()
+    currentUser: UserResponse,
+  ) {
+    return await this.productsService.getNewestProducts(+count, currentUser);
+  }
+  @Get('popular')
+  async getTopRatingProducts(
+    @Query('count') count: number,
+    @CurrentUser()
+    currentUser: UserResponse,
+  ) {
+    return await this.productsService.getTopRatingProducts(+count, currentUser);
+  }
+
+  @Get('/:id')
   @ApiParam({ name: 'id', required: true, type: Number })
   async findOneUser(
     @Param('id') id: number,

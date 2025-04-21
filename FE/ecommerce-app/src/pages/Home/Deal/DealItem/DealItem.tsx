@@ -1,17 +1,14 @@
 import "./DealItem.scss";
 import Banner5 from "../../../../assets/images/banner-5.png";
-import RatingProduct from "../../../../components/share/RatingProduct/RatingProduct";
-import ManufacturerProduct from "../../../../components/share/ManufacturerProduct/ManufacturerProduct";
-import PriceProduct from "../../../../components/share/PriceProduct/PriceProduct";
-import ButtonAddCart from "../../../../components/share/ButtonAddCart/ButtonAddCart";
+import RatingProduct from "../../../../components/share/rating-product/rating-product";
+import ManufacturerProduct from "../../../../components/share/manufacture-product/manufacture-product";
+import PriceProduct from "../../../../components/share/price-product/price-product";
+import ButtonAddCart from "../../../../components/share/button-add-cart/button-add-cart";
 
 const DealItem = () => {
   return (
     <>
-      <div
-        className="col-xl-3 col-lg-4 col-md-6 d-xl-block"
-        style={{ padding: "12px" }}
-      >
+      <div className="col-xl-3 col-lg-4 col-md-6 d-xl-block" style={{ padding: "12px" }}>
         <div className="product-cart-wrap style-2   deal-item">
           <div className="product-img-action-wrap">
             <div className="product-img">

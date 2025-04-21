@@ -15,8 +15,7 @@ export class CreateProductDto {
   @ApiProperty()
   price: number;
 
-  @ApiProperty()
-  branch_id: number;
+  
 
   @ApiProperty()
   default_media_id: number;

@@ -3,7 +3,6 @@ import {
   CreateDateColumn,
   Entity,
   PrimaryGeneratedColumn,
-  Timestamp,
   UpdateDateColumn,
 } from 'typeorm';
 
@@ -24,11 +23,11 @@ export class BannerEntity {
   @Column()
   media_id: number;
 
-  @CreateDateColumn()
-  created_at: Timestamp;
+  @CreateDateColumn({ type: 'timestamp' })
+  created_at: string;
 
-  @UpdateDateColumn()
-  updated_at: Timestamp;
+  @UpdateDateColumn({ type: 'timestamp' })
+  updated_at: string;
 
   @Column()
   user_id_created: number;

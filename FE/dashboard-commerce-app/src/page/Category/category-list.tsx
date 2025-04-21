@@ -85,8 +85,8 @@ const CategoryList = () => {
     }
 
     setCurrentParentCategory(null);
-    const branch_id = JSON.parse(getCookie("data_user")).branch_id;
-    getListParentCategory({ status: -1, branch_id: branch_id });
+    
+    getListParentCategory({ status: -1});
     setRefresh(false);
   }, [location, parentNameCategory]);
 
@@ -105,7 +105,6 @@ const CategoryList = () => {
   useEffect(() => {
     if (currentParentCategory) {
       getListChildCategory({
-        branch_id: JSON.parse(getCookie("data_user")).branch_id,
         page: pageListChild,
         limit: LIMIT,
       });
@@ -116,15 +115,14 @@ const CategoryList = () => {
     if (refresh) {
       if (currentParentCategory) {
         getListChildCategory({
-          branch_id: JSON.parse(getCookie("data_user")).branch_id,
           page: pageListChild,
           limit: LIMIT,
         });
       } else {
         setCurrentParentCategory(null);
 
-        const branch_id = JSON.parse(getCookie("data_user")).branch_id;
-        getListParentCategory({ status: -1, branch_id: branch_id });
+        
+        getListParentCategory({ status: -1 });
       }
       setRefresh(false);
     }

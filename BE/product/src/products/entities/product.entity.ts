@@ -2,10 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
-  Timestamp,
   UpdateDateColumn,
 } from 'typeorm';
 
@@ -29,20 +26,17 @@ export class ProductEntity {
   @Column({ default: '' })
   description: string;
 
-  @CreateDateColumn()
-  created_at: Timestamp;
+  @CreateDateColumn({ type: 'timestamp' })
+  created_at: string;
 
-  @UpdateDateColumn()
-  updated_at: Timestamp;
+  @UpdateDateColumn({ type: 'timestamp' })
+  updated_at: string;
 
   @Column()
   user_id_created: number;
 
   @Column()
   user_id_updated: number;
-
-  @Column()
-  branch_id: number;
 
   @Column({ default: 1 })
   status: number;
@@ -58,7 +52,10 @@ export class ProductEntity {
 
   @Column({ default: 0 })
   quantity: number;
-   
+
   @Column({ default: 0 })
-  stock : number;
+  stock: number;
+
+  @Column('float', { default: 3.5 })
+  rating: number;
 }

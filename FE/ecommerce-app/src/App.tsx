@@ -1,9 +1,9 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import Home from "./pages/Home/Home";
+import Home from "./pages/Home/home";
 import About from "./pages/About/About";
-import ListProduct from "./pages/ListProduct/ListProduct";
+import ListProduct from "./pages/list-product/list-product";
 import NotFound from "./pages/NotFound/NotFound";
 import DetailProduct from "./pages/DetailProduct/DetailProduct";
 import CompareProduct from "./pages/CompareProduct/CompareProduct";

@@ -25,7 +25,6 @@ export const ModalExpired = ({  }: ModalExpiredProps) => {
   //       onClick={() => {
   //         setIsOpen(expired);
   //         CookieUtils.eraseCookie("user");
-  //         CookieUtils.eraseCookie("branch_id");
   //         setExpired(false);
   //         localStorage.removeItem("chatHistory");
   //         window.location.href = MODULE_ROUTE.LOGIN;

@@ -13,7 +13,6 @@ export function mapUserResponse(user: UserEntity, token?: string) {
     updated_at: user.updated_at,
     roles: user.roles,
     access_token: token,
-    branch_id: user.branch_id,
   };
   if (token) {
     return { ...response, access_token: token };

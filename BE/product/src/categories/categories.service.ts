@@ -53,13 +53,11 @@ export class CategoriesService {
   }
   async findAllCategoryParent(
     status: number = GetTypeEnum.NOT_DELETED,
-    branch_id: number,
     currentUser: UserResponse,
   ): Promise<ApiResponse<PaginatedResponse<CategoryResponse>>> {
     try {
       const get_all: any = {
         parent_id: IsNull(),
-        branch_id: branch_id,
       };
       if (status == GetTypeEnum.ALL) {
         get_all.status = In([0, 1]);
@@ -127,14 +125,17 @@ export class CategoriesService {
 
   async findAllCategoryChild(
     status: number = GetTypeEnum.NOT_DELETED,
-    branch_id: number,
+    parent_id: number,
     currentUser: UserResponse,
   ): Promise<ApiResponse<PaginatedResponse<CategoryResponse>>> {
     try {
-      const get_all: any = {
-        parent_id: Not(IsNull()),
-        branch_id: branch_id,
-      };
+
+      const get_all: any = {};
+      if (parent_id == GetTypeEnum.ALL) {
+        get_all.parent_id = Not(IsNull());
+      } else {
+        get_all.parent_id = parent_id;
+      }
       if (status == GetTypeEnum.ALL) {
         get_all.status = In([0, 1]);
       } else {
@@ -254,13 +255,11 @@ export class CategoriesService {
     limit: number = 10,
     status: number = GetTypeEnum.ALL,
     parent_id: number,
-    branch_id: number,
     currentUser: UserResponse,
   ): Promise<ApiResponse<PaginatedResponse<CategoryResponse>>> {
     try {
       let get_all: any = {
         parent_id: parent_id,
-        branch_id: branch_id,
       };
       if (status == GetTypeEnum.ALL) {
         get_all.status = In([0, 1]);
@@ -410,7 +409,6 @@ export class CategoriesService {
       category.user_id_created = currentUser.id;
       category.user_id_updated = currentUser.id;
       category.code = formatSlug(createCategoryDto.name);
-      category.branch_id = createCategoryDto.branch_id;
       const data = await this.categoryRepository.save(category);
       return createResponse(
         HttpStatus.OK,

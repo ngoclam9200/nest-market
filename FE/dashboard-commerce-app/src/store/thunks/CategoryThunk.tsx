@@ -33,12 +33,10 @@
 //         payload: true,
 //       });
 
-//       const branch_id = JSON.parse(getCookie("data_user")).branch_id;
-//       console.log(branch_id);
 
 //       const response = await getListParentCategory({
 //         status: -1,
-//         branch_id: branch_id,
+//
 //       });
 //       dispatch({
 //         type: SET_PARENT_CATEGORIES,
@@ -79,10 +77,9 @@
 //         type: SET_WAITING_CALL_API,
 //         payload: true,
 //       });
-//       const branch_id = JSON.parse(getCookie("data_user")).branch_id;
 //       const response = await getListChildCategory({
 //         parent_id: parentId,
-//         branch_id: branch_id,
+//
 //         page: page,
 //         limit: limit,
 //       });

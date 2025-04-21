@@ -1,6 +1,6 @@
 import { Roles } from '../common/user-roles.enum';
 
-export interface UserResponse {
+export class UserResponse {
   id: number;
   username: string;
   email: string;
@@ -11,5 +11,6 @@ export interface UserResponse {
   created_at: string;
   updated_at: string;
   status: boolean;
-  branch_id: number;
+
+  
 }

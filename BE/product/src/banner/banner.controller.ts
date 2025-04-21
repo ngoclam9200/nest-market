@@ -99,7 +99,7 @@ export class BannerController {
       throw new HttpException(error, HttpStatus.BAD_REQUEST);
     }
   }
-
+ 
   @Post('change-status')
   @UseGuards(AuthorizeGuard(['admin']))
   async changeStatus(@Body('id') id: number, @Body('status') status: number) {

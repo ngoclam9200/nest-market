@@ -1,5 +1,6 @@
 import { MediaResponse } from "./media";
 import { UserResponse } from "./user";
+ 
 
 export class CategoryResponse {
   id: number = 0;
@@ -15,6 +16,9 @@ export class CategoryResponse {
   media_id: number = 0;
   code: string = "";
   status: number = 1;
+  children?: CategoryResponse[] = [];
+  is_open?: boolean = false;
+  is_call_api_child?: boolean = false;
 
   constructor(data?: Partial<CategoryResponse>) {
     if (data) {

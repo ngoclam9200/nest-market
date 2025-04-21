@@ -165,7 +165,7 @@ const UpdateBannerPopup: React.FC<UpdateBannerProps> = ({ open, setRefresh, setI
 
                 {uploadedMedia.length > 0 && (
                   <div className="mt-2">
-                    <img src={uploadedMedia[0].url} alt="Banner preview" style={{ width: "100%", maxHeight: "200px" }} />
+                    <img src={domainMedia + uploadedMedia[0].url} alt="Banner preview" style={{ width: "100%", maxHeight: "200px" }} />
                   </div>
                 )}
                 {uploadedMedia.length === 0 && (

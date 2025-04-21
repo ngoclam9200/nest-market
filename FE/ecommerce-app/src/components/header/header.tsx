@@ -17,42 +17,42 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import { ClickAwayListener } from "@mui/material";
 import Nav from "./nav/nav";
-import Home from "../../pages/Home/Home";
 import MenuIcon from "@mui/icons-material/Menu";
+import { CategoryService } from "../../services/category/category-service";
+import { isSuccess } from "../../services/base-response";
+import { CategoryResponse } from "../../response/category";
 const Header = () => {
   const [isOpenDropDown, setisOpenDropDown] = useState(false);
-  const [categories, setcategories] = useState([
-    "All Categories",
-    "Milks and Dairies",
-    "Wines and Alcohol",
-    "Clothing and Beauty",
-    "Pet Foods and Toy",
-    "Fast food",
-    "Baking material",
-    "Vegetables",
-    "Fresh Seafood",
-    "Noodles and Rice",
-    "Ice cream",
-  ]);
+  const { fetch: getListParentCategory, response: resListParentCategory } = CategoryService.getListParentCategory();
+  const [categories, setCategories] = useState<CategoryResponse[]>([]);
+  useEffect(() => {
+    getListParentCategory({ status: 1 });
+  }, []);
+  useEffect(() => {
+    if (resListParentCategory) {
+      if (isSuccess(resListParentCategory)) {
+        setCategories([{ id: -1, name: "Tất cả danh mục" } as CategoryResponse, ...resListParentCategory.data]);
+      }
+    }
+  }, [resListParentCategory]);
 
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      if (scrollTop > 100) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
 
-   const [scrolled, setScrolled] = useState(false);
-   useEffect(() => {
-     const handleScroll = () => {
-       const scrollTop = window.scrollY || document.documentElement.scrollTop;
-       if (scrollTop > 100) {
-         setScrolled(true);
-       } else {
-         setScrolled(false);
-       }
-     };
+    window.addEventListener("scroll", handleScroll);
 
-     window.addEventListener("scroll", handleScroll);
-
-     return () => {
-       window.removeEventListener("scroll", handleScroll);
-     };
-   }, []);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   return (
     <>
@@ -70,10 +70,10 @@ const Header = () => {
             <div className="col-sm-5 search-bar">
               <div className="headerSearch d-flex align-items-center">
                 <div className="selectDrop cursor position-relative">
-                  <SelectDrop data={categories} placeholder="All Categories" />
+                  <SelectDrop isAll={true} data={categories} placeholder="Tất cả danh mục" />
                 </div>
                 <div className="search">
-                  <input type="text" placeholder="Search for item..." />
+                  <input type="text" placeholder="Tìm kiếm sản phẩm" />
                   <SearchIcon className="searchIcon" />
                 </div>
               </div>
@@ -90,10 +90,7 @@ const Header = () => {
                   <NotifyCount icon={IconCart} count={10} text={"Cart"} />
                 </li>
                 <ClickAwayListener onClickAway={() => setisOpenDropDown(false)}>
-                  <li
-                    className="list-inline-item-icon d-flex "
-                    onClick={() => setisOpenDropDown(!isOpenDropDown)}
-                  >
+                  <li className="list-inline-item-icon d-flex " onClick={() => setisOpenDropDown(!isOpenDropDown)}>
                     <NotifyCount icon={IconUser} count={0} text={"Account"} />
                     {isOpenDropDown && (
                       <ul className="dropdownMenu">

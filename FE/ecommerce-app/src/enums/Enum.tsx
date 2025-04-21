@@ -83,3 +83,5 @@ export declare const enum MethodPostGetEnums {
   TRUE = 1,
   FALSE = 0,
 }
+
+export const domainMedia = import.meta.env.VITE_API_DOMAIN + import.meta.env.VITE_API_MEDIA_PORT + "/";

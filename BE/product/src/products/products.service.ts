@@ -60,15 +60,20 @@ export class ProductService {
     page: number = 1,
     limit: number = 10,
     status: number,
+    category_id: number,
     currentUser: UserResponse,
   ): Promise<ApiResponse<PaginatedResponse<ProductResponse>>> {
     try {
-      let get_all = {};
+      const get_all: any = {};
+      if (category_id != GetTypeEnum.ALL) {
+        get_all.category_id = category_id;
+      } 
       if (status == GetTypeEnum.ALL) {
-        get_all = { status: In([0, 1]) };
+        get_all.status = In([0, 1]);
       } else {
-        get_all = { status: status };
+        get_all.status = status;
       }
+
       const [list, total_record] = await this.productRepository.findAndCount({
         where: get_all,
         skip: (page - 1) * limit,
@@ -216,8 +221,12 @@ export class ProductService {
 
       product.user_id_created = currentUser.id;
       product.user_id_updated = currentUser.id;
+      product.rating = parseFloat(
+        (Math.round((4 + Math.random()) * 10) / 10).toFixed(1),
+      );
 
       product = await this.productRepository.save(product);
+      console.log('🚀 ~ ProductService ~ product:', product);
       // let product_price =
       //   await this.productPriceRepository.create(createProductDto);
       // product_price.user_id_created = currentUser.id;
@@ -345,5 +354,129 @@ export class ProductService {
         category,
       ),
     );
+  }
+
+  async getNewestProducts(
+    count: number,
+    currentUser: UserResponse,
+  ): Promise<ApiResponse<ProductResponse[]>> {
+    console.log('🚀 ~ ProductService ~ count:', count);
+    try {
+      const products = await this.productRepository.find({
+        where: { status: 1 }, // Only active products
+        order: { created_at: 'DESC' }, // Order by creation date, newest first
+        take: count, // Limit to 3 products
+      });
+
+      const mappedProducts = await Promise.all(
+        products.map(async (product) => {
+          let list_media: ApiResponse<MediaResponse[]> = await lastValueFrom(
+            this.mediaServiceGrpc.getMediasByIds({
+              media_ids: product.list_media_id,
+            }),
+          );
+          if (list_media.status != HttpStatus.OK) {
+            throw new BadRequestException(list_media.message);
+          }
+          const category = await this.categoryRepository.findOne({
+            where: { id: product.category_id },
+          });
+
+          if (currentUser?.roles?.includes(Roles.ADMIN)) {
+            let user_created_and_updated: ApiResponse<UserResponse[]> =
+              await lastValueFrom(
+                this.userServiceGrpc.getUsersByIds({
+                  user_ids: [product.user_id_created, product.user_id_updated],
+                }),
+              );
+            const user_created = user_created_and_updated.data.find(
+              (item) => item.id == product.user_id_created,
+            );
+            const user_updated = user_created_and_updated.data.find(
+              (item) => item.id == product.user_id_updated,
+            );
+
+            return mapProductResponseWithAdmin(
+              product,
+              user_created,
+              user_updated,
+              list_media.data,
+              category,
+            );
+          } else {
+            return mapProductResponseWithUser(
+              product,
+              list_media.data,
+              category,
+            );
+          }
+        }),
+      );
+
+      return createResponse(HttpStatus.OK, 'OK', mappedProducts);
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+    }
+  }
+  async getTopRatingProducts(
+    count: number,
+    currentUser: UserResponse,
+  ): Promise<ApiResponse<ProductResponse[]>> {
+    try {
+      const products = await this.productRepository.find({
+        where: { status: 1 }, // Only active products
+        order: { rating: 'DESC' }, // Order by rating in descending order
+        take: count, // Limit results by count
+      });
+
+      const mappedProducts = await Promise.all(
+        products.map(async (product) => {
+          let list_media: ApiResponse<MediaResponse[]> = await lastValueFrom(
+            this.mediaServiceGrpc.getMediasByIds({
+              media_ids: product.list_media_id,
+            }),
+          );
+          if (list_media.status != HttpStatus.OK) {
+            throw new BadRequestException(list_media.message);
+          }
+          const category = await this.categoryRepository.findOne({
+            where: { id: product.category_id },
+          });
+
+          if (currentUser?.roles?.includes(Roles.ADMIN)) {
+            let user_created_and_updated: ApiResponse<UserResponse[]> =
+              await lastValueFrom(
+                this.userServiceGrpc.getUsersByIds({
+                  user_ids: [product.user_id_created, product.user_id_updated],
+                }),
+              );
+            const user_created = user_created_and_updated.data.find(
+              (item) => item.id == product.user_id_created,
+            );
+            const user_updated = user_created_and_updated.data.find(
+              (item) => item.id == product.user_id_updated,
+            );
+
+            return mapProductResponseWithAdmin(
+              product,
+              user_created,
+              user_updated,
+              list_media.data,
+              category,
+            );
+          } else {
+            return mapProductResponseWithUser(
+              product,
+              list_media.data,
+              category,
+            );
+          }
+        }),
+      );
+
+      return createResponse(HttpStatus.OK, 'OK', mappedProducts);
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+    }
   }
 }

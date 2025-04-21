@@ -5,7 +5,6 @@ import { HttpStatusCode } from "axios";
 import Popup from "../../../components/share/Popup/Popup";
 import Toast from "../../../components/share/Toast/Toast";
 import { CategoryResponse } from "../../../response/category";
-import { getCookie } from "../../../services/cookie";
 import { MediaResponse } from "../../../response/media";
 import { upload } from "../../../services/media/media-service";
 import { CategoryService } from "../../../services/category/category-service";
@@ -44,7 +43,7 @@ const CreateCategoryPopup: React.FC<CreateCategoryProps> = ({ open, setRefresh, 
 
   useEffect(() => {
     if (open) {
-      getCategoryParent({ status: 1, branch_id: JSON.parse(getCookie("data_user")).branch_id });
+      getCategoryParent({ status: 1});
     }
   }, [open]);
   useEffect(() => {
@@ -58,13 +57,11 @@ const CreateCategoryPopup: React.FC<CreateCategoryProps> = ({ open, setRefresh, 
   }, [resCategoryparent]);
 
   const handleSubmit = async (values: CategoryFormValues, {}: FormikHelpers<CategoryFormValues>) => {
-    const branchId = JSON.parse(getCookie("data_user")).branch_id;
     createCategory({
       name: values.name,
       description: values.description,
       parent_id: values.parent_id,
       media_id: values.media_id,
-      branch_id: branchId,
     });
   };
   useEffect(() => {

@@ -33,21 +33,17 @@ export class FindAllCategoryChildDTO {
   @IsInt()
   parent_id: number;
 
-  @Type(() => Number)
-  @IsInt()
-  @IsNotEmpty()
-  branch_id: number;
+ 
 }
 
 export class FindAllCategoryParentDTO {
-
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   status?: number = -1;
 
+  @IsOptional()
   @Type(() => Number)
   @IsInt()
-  @IsNotEmpty()
-  branch_id: number;
+  parent_id?: number = -1;
 }

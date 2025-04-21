@@ -1,5 +1,5 @@
-import PriceProduct from "../../../../components/share/PriceProduct/PriceProduct";
-import RatingProduct from "../../../../components/share/RatingProduct/RatingProduct";
+import PriceProduct from "../../../../components/share/price-product/price-product";
+import RatingProduct from "../../../../components/share/rating-product/rating-product";
 import "./SmallProduct.scss";
 import Thumnail1 from "../../../../assets/images/product/thumbnail-1.jpg";
 const SmallProduct = () => {

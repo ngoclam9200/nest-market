@@ -1,16 +1,15 @@
-import { Timestamp } from 'typeorm';
 import { UserResponse } from './user.response';
 import { BannerEntity } from 'src/banner/entities/banner.entity';
 import { MediaResponse } from './media.response';
-import { title } from 'process';
+ 
 
 export interface BannerResponse {
   id: number;
   name: string;
   description: string;
   media_id: number;
-  created_at: Timestamp;
-  updated_at: Timestamp;
+  created_at: string;
+  updated_at: string;
   user_created?: UserResponse;
   user_updated?: UserResponse;
   title: string;

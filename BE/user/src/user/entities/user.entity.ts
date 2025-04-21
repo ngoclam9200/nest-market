@@ -1,6 +1,11 @@
-
-import { Roles } from "src/utils/common/user-roles.enum";
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, Timestamp, UpdateDateColumn } from "typeorm";
+import { Roles } from 'src/utils/common/user-roles.enum';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity('users')
 export class UserEntity {
@@ -28,19 +33,15 @@ export class UserEntity {
   @Column({ type: 'enum', enum: Roles, array: true, default: [Roles.USER] })
   roles: Roles[];
 
-  @CreateDateColumn()
-  created_at: Timestamp;
+  @CreateDateColumn({ type: 'timestamp' })
+  created_at: string;
 
-  @UpdateDateColumn()
-  updated_at: Timestamp;
+  @UpdateDateColumn({ type: 'timestamp' })
+  updated_at: string;
 
   @Column({ default: 1 })
   status?: number;
 
-  @Column({ default: 0 })
-  branch_id?: number;
-
   @Column({ nullable: true })
   access_token: string;
 }
-

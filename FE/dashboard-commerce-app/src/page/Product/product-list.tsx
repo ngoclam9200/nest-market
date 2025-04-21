@@ -41,11 +41,11 @@ const ProductList = () => {
   const [page, setPage] = useState(1);
 
   useEffect(() => {
-    getListProduct({ page, limit: LIMIT });
+    getListProduct({ page, limit: LIMIT , category_id:-1 });
   }, [page, location]);
   useEffect(() => {
     if (refresh) {
-      getListProduct({ page, limit: LIMIT });
+      getListProduct({ page, limit: LIMIT , category_id:-1 });
     }
   }, [refresh]);
 

@@ -11,7 +11,6 @@ export class UserResponse {
   updated_at: string = "";
   gender: GenderTypeEnum = 1; // Assuming MALE is a default value in your enum
   status: boolean = true;
-  branch_id: string = "";
   access_token: string = "";
 
   constructor(data?: Partial<UserResponse>) {

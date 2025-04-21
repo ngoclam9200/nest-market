@@ -1,5 +1,4 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateCategoryDto } from './create-category.dto';
+ 
 import { ApiProperty } from '@nestjs/swagger';
 import { IsInt, IsNotEmpty } from 'class-validator';
 
@@ -20,7 +19,5 @@ export class UpdateCategoryDto {
   @IsInt()
   media_id: number;
 
-  @IsNotEmpty({ message: 'Chi nhánh không được để trống' })
-  @ApiProperty()
-  branch_id: number;
+  
 }

@@ -18,4 +18,9 @@ export class FindAllProductDTO {
   @Type(() => Number)
   @IsInt()
   status?: number = -1;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  category_id?: number = -1;
 }

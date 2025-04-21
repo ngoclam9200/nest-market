@@ -114,7 +114,6 @@ const CreateProductPopup: React.FC<CreateProductProps> = ({ open, setRefresh, se
       description: values.description,
       category_id: values.categoryId,
       price: price_product,
-      branch_id: JSON.parse(getCookie("data_user")).branch_id,
       default_media_id: default_media_id,
       list_media_id: list_media_id,
       discount: values.discount,
@@ -251,7 +250,7 @@ const CreateProductPopup: React.FC<CreateProductProps> = ({ open, setRefresh, se
                       name="quantity"
                       className="form-control"
                       placeholder="Số lượng"
-                      value={values.price}
+                      value={values.quantity}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                         const numericValue = removeNonNumeric(e.target.value);
                         setFieldValue("quantity", formatCurrency(Number(numericValue)));

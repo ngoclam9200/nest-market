@@ -10,7 +10,7 @@ export const ProductService = {
       projectId: ApiConfig.PROJECT_ID.PRODUCT_SERVICE,
     });
     return {
-      fetch: (params: { page: number; limit: number }) =>
+      fetch: (params: { page: number; limit: number , category_id: number }) =>
         request({
           endPoint: API_PRODUCT_URL.GET_LIST_PRODUCT,
           data: params,
@@ -30,7 +30,6 @@ export const ProductService = {
         description: string;
         category_id: number;
         price: number;
-        branch_id: number;
         default_media_id: number;
         list_media_id: number[];
         discount: number;

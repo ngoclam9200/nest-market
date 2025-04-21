@@ -1,5 +1,5 @@
 import QuantityInput from "../../components/share/QuantityInput/QuantityInput";
-import RatingProduct from "../../components/share/RatingProduct/RatingProduct";
+import RatingProduct from "../../components/share/rating-product/rating-product";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import "./Cart.scss";
 
@@ -12,8 +12,7 @@ const Cart = () => {
             <h1 className="heading-2 mb-10">Your Cart</h1>
             <div className="d-flex justify-content-between">
               <h6 className="text-body">
-                There are <span className="text-brand">3</span> products in your
-                cart
+                There are <span className="text-brand">3</span> products in your cart
               </h6>
               <h6 className="text-body">
                 <a href="#" className="text-muted">
@@ -30,13 +29,7 @@ const Cart = () => {
                 <thead>
                   <tr className="main-heading">
                     <th className="custome-checkbox start pl-30">
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        name="checkbox"
-                        id="exampleCheckbox11"
-                        value=""
-                      />
+                      <input className="form-check-input" type="checkbox" name="checkbox" id="exampleCheckbox11" value="" />
                     </th>
                     <th scope="col" colSpan={2}>
                       Product
@@ -52,26 +45,14 @@ const Cart = () => {
                 <tbody>
                   <tr className="pt-30">
                     <td className="custome-checkbox pl-30">
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        name="checkbox"
-                        id="exampleCheckbox1"
-                        value=""
-                      />
+                      <input className="form-check-input" type="checkbox" name="checkbox" id="exampleCheckbox1" value="" />
                     </td>
                     <td className="image product-thumbnail pt-40">
-                      <img
-                        src="https://nest-frontend-v6.vercel.app/assets/imgs/shop/product-1-1.jpg"
-                        alt="#"
-                      />
+                      <img src="https://nest-frontend-v6.vercel.app/assets/imgs/shop/product-1-1.jpg" alt="#" />
                     </td>
                     <td className="product-des product-name">
                       <h6 className="mb-5">
-                        <a
-                          className="product-name mb-10 text-heading"
-                          href="shop-product-right.html"
-                        >
+                        <a className="product-name mb-10 text-heading" href="shop-product-right.html">
                           Field Roast Chao Cheese Creamy Original
                         </a>
                       </h6>
@@ -94,26 +75,14 @@ const Cart = () => {
                   </tr>
                   <tr>
                     <td className="custome-checkbox pl-30">
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        name="checkbox"
-                        id="exampleCheckbox2"
-                        value=""
-                      />
+                      <input className="form-check-input" type="checkbox" name="checkbox" id="exampleCheckbox2" value="" />
                     </td>
                     <td className="image product-thumbnail">
-                      <img
-                        src="https://nest-frontend-v6.vercel.app/assets/imgs/shop/product-1-1.jpg"
-                        alt="#"
-                      />
+                      <img src="https://nest-frontend-v6.vercel.app/assets/imgs/shop/product-1-1.jpg" alt="#" />
                     </td>
                     <td className="product-des product-name">
                       <h6 className="mb-5">
-                        <a
-                          className="product-name mb-10 text-heading"
-                          href="shop-product-right.html"
-                        >
+                        <a className="product-name mb-10 text-heading" href="shop-product-right.html">
                           Blue Diamond Almonds Lightly Salted
                         </a>
                       </h6>
@@ -124,7 +93,7 @@ const Cart = () => {
                     </td>
                     <td className="text-center detail-info" data-title="Stock">
                       <div className="detail-extralink mr-15">
-                       <QuantityInput count={1}></QuantityInput>
+                        <QuantityInput count={1}></QuantityInput>
                       </div>
                     </td>
                     <td className="price" data-title="Price">
@@ -136,26 +105,14 @@ const Cart = () => {
                   </tr>
                   <tr>
                     <td className="custome-checkbox pl-30">
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        name="checkbox"
-                        id="exampleCheckbox3"
-                        value=""
-                      />
+                      <input className="form-check-input" type="checkbox" name="checkbox" id="exampleCheckbox3" value="" />
                     </td>
                     <td className="image product-thumbnail">
-                      <img
-                        src="https://nest-frontend-v6.vercel.app/assets/imgs/shop/product-1-1.jpg"
-                        alt="#"
-                      />
+                      <img src="https://nest-frontend-v6.vercel.app/assets/imgs/shop/product-1-1.jpg" alt="#" />
                     </td>
                     <td className="product-des product-name">
                       <h6 className="mb-5">
-                        <a
-                          className="product-name mb-10 text-heading"
-                          href="shop-product-right.html"
-                        >
+                        <a className="product-name mb-10 text-heading" href="shop-product-right.html">
                           Fresh Organic Mustard Leaves Bell Pepper
                         </a>
                       </h6>
@@ -166,7 +123,7 @@ const Cart = () => {
                     </td>
                     <td className="text-center detail-info" data-title="Stock">
                       <div className="detail-extralink mr-15">
-                         <QuantityInput count={1}></QuantityInput>
+                        <QuantityInput count={1}></QuantityInput>
                       </div>
                     </td>
                     <td className="price" data-title="Price">
@@ -220,9 +177,7 @@ const Cart = () => {
                         <h6 className="text-muted">Estimate for</h6>
                       </td>
                       <td className="cart_total_amount">
-                        <h5 className="text-heading text-end">
-                          United Kingdom{" "}
-                        </h5>
+                        <h5 className="text-heading text-end">United Kingdom </h5>
                       </td>
                     </tr>{" "}
                     <tr>

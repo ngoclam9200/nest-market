@@ -10,7 +10,7 @@ export const CategoryService = {
       projectId: ApiConfig.PROJECT_ID.PRODUCT_SERVICE,
     });
     return {
-      fetch: (params: { status: number; branch_id: number }) =>
+      fetch: (params: { status: number;  }) =>
         request({
           endPoint: API_CATEGORY_URL.GET_PARENT_CATEGORY,
           data: params,
@@ -25,7 +25,7 @@ export const CategoryService = {
       projectId: ApiConfig.PROJECT_ID.PRODUCT_SERVICE,
     });
     return {
-      fetch: (params : {  branch_id: number; page: number; limit: number }) =>
+      fetch: (params : {   page: number; limit: number }) =>
         request({
           endPoint: API_CATEGORY_URL.GET_CHILD_CATEGORY,
           data: params,
@@ -69,7 +69,7 @@ export const CategoryService = {
       projectId: ApiConfig.PROJECT_ID.PRODUCT_SERVICE,
     });
     return {
-      fetch: (data: { name: string; description: string; parent_id?: number | null; branch_id: number; media_id: number }) =>
+      fetch: (data: { name: string; description: string; parent_id?: number | null;  media_id: number }) =>
         request({
           endPoint: API_CATEGORY_URL.CREATE_CATEGORY,
           data: data,
@@ -84,7 +84,7 @@ export const CategoryService = {
       projectId: ApiConfig.PROJECT_ID.PRODUCT_SERVICE,
     });
     return {
-      fetch: (data: { id: number; name: string; description: string; branch_id: number; media_id: number }) =>
+      fetch: (data: { id: number; name: string; description: string;  media_id: number }) =>
         request({
           endPoint: API_CATEGORY_URL.UPDATE_CATEGORY,
           data: data,

@@ -5,7 +5,6 @@ import { HttpStatusCode } from "axios";
 import Popup from "../../../components/share/Popup/Popup";
 import Toast from "../../../components/share/Toast/Toast";
 import { CategoryResponse } from "../../../response/category";
-import { getCookie } from "../../../services/cookie";
 import { MediaResponse } from "../../../response/media";
 import { upload } from "../../../services/media/media-service";
 import { CategoryService } from "../../../services/category/category-service";
@@ -58,7 +57,7 @@ const UpdateCategoryPopup: React.FC<UpdateCategoryProps> = ({ open, setRefresh, 
 
   useEffect(() => {
     if (open) {
-      getCategoryParent({ status: 1, branch_id: JSON.parse(getCookie("data_user")).branch_id });
+      getCategoryParent({ status: 1 });
     }
   }, [open, category]);
 
@@ -118,7 +117,6 @@ const UpdateCategoryPopup: React.FC<UpdateCategoryProps> = ({ open, setRefresh, 
       id: category.id,
       name: values.name,
       description: values.description,
-      branch_id: JSON.parse(getCookie("data_user")).branch_id,
       media_id: values.media_id,
     });
   };

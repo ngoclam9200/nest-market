@@ -1,52 +1,71 @@
-import { getData } from "../api-service";
-
-import { DataArray, HttpResponse } from "../../response/http-response";
+import { useFetchData } from "../../hooks/useFetch";
 import { CategoryResponse } from "../../response/category";
+import { DataArray } from "../../response/http-response";
+import { ApiConfig } from "../api-config";
 import { API_CATEGORY_URL } from "../api-endpoint";
+
+export const CategoryService = {
+  getListParentCategory: () => {
+    const { request, baseResponse, loading } = useFetchData.Get<CategoryResponse[]>({
+      projectId: ApiConfig.PROJECT_ID.PRODUCT_SERVICE,
+    });
+    return {
+      fetch: (params: { status: number;  }) =>
+        request({
+          endPoint: API_CATEGORY_URL.GET_PARENT_CATEGORY,
+          data: params,
+        }),
+      response: baseResponse,
+      loading: loading,
+    };
+  },
+
+  getListChildCategory: () => {
+    const { request, baseResponse, loading } = useFetchData.Get<DataArray<CategoryResponse>>({
+      projectId: ApiConfig.PROJECT_ID.PRODUCT_SERVICE,
+    });
+    return {
+      fetch: (params: { page: number; limit: number }) =>
+        request({
+          endPoint: API_CATEGORY_URL.GET_CHILD_CATEGORY,
+          data: params,
+        }),
+      response: baseResponse,
+      loading: loading,
+    };
+  },
+
+  getAllChildCategory: () => {
+    const { request, baseResponse, loading } = useFetchData.Get<CategoryResponse[]>({
+      projectId: ApiConfig.PROJECT_ID.PRODUCT_SERVICE,
+    });
+    return {
+      fetch: (params: { parent_id: number; status: number }) =>
+        request({
+          endPoint: API_CATEGORY_URL.GET_ALL_CHILD_CATEGORY,
+          data: params,
+        }),
+      response: baseResponse,
+      loading: loading,
+    };
+  },
+
+  getCategoryWithCode: () => {
+    const { request, baseResponse, loading } = useFetchData.Get<CategoryResponse>({
+      projectId: ApiConfig.PROJECT_ID.PRODUCT_SERVICE,
+    });
+    return {
+      fetch: (code: string) =>
+        request({
+          endPoint: API_CATEGORY_URL.GET_CATEGORY_WITH_CODE + code,
+        }),
+      response: baseResponse,
+      loading: loading,
+    };
+  },
+
+ 
  
 
-const domain = import.meta.env.VITE_API_DOMAIN + import.meta.env.VITE_API_PRODUCT_PORT + import.meta.env.VITE_API_PREFIX;
-
-export const getListParentCategory = async (param: any): Promise<HttpResponse<CategoryResponse[]>> => {
-  try {
-    const response = await getData(domain + API_CATEGORY_URL.GET_PARENT_CATEGORY, param);
-    return response;
-  } catch (error) {
-    console.error("Error logging in:", error);
-    throw error;
-  }
-};
-
-export const getListChildCategory = async (param: any): Promise<HttpResponse<DataArray<CategoryResponse>>> => {
-  try {
-    const response = await getData(domain + API_CATEGORY_URL.GET_CHILD_CATEGORY, param);
-    return response;
-  } catch (error) {
-    console.error("Error logging in:", error);
-    throw error;
-  }
-};
-
-export const getAllChildCategory = async (param: any): Promise<HttpResponse<CategoryResponse[]>> => {
-  try {
-    const response = await getData(domain + API_CATEGORY_URL.GET_ALL_CHILD_CATEGORY, param);
-    return response;
-  } catch (error) {
-    console.error("Error logging in:", error);
-    throw error;
-  }
-};
-
-export const getCategoryWithCode = async (code: string): Promise<HttpResponse<CategoryResponse>> => {
-  try {
-    const response = await getData(
-      // getUrlWithEndPoint(
-      domain + API_CATEGORY_URL.GET_CATEGORY_WITH_CODE + code
-      // )
-    );
-    return response;
-  } catch (error) {
-    console.error("Error logging in:", error);
-    throw error;
-  }
+ 
 };

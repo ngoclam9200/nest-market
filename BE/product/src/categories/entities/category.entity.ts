@@ -2,10 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
-  Timestamp,
   UpdateDateColumn,
 } from 'typeorm';
 
@@ -23,11 +20,11 @@ export class CategoryEntity {
   @Column()
   media_id: number;
 
-  @CreateDateColumn()
-  created_at: Timestamp;
+  @CreateDateColumn({ type: 'timestamp' })
+  created_at: string;
 
-  @UpdateDateColumn()
-  updated_at: Timestamp;
+  @UpdateDateColumn({ type: 'timestamp' })
+  updated_at: string;
 
   @Column()
   user_id_created: number;
@@ -43,7 +40,4 @@ export class CategoryEntity {
 
   @Column({ default: 1, name: 'status' })
   status: number;
-
-  @Column({ default: 0 })
-  branch_id: number;
 }

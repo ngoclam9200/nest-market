@@ -1,6 +1,7 @@
 import { CategoryResponse } from "./category";
 import { MediaResponse } from "./media";
 import { UserResponse } from "./user";
+ 
 
  
 
@@ -25,6 +26,7 @@ export class ProductResponse {
   unit: string = "";
   discount: number = 0;
   quantity: number = 0;
+  rating: number = 0;
 
 
   constructor(data?: Partial<ProductResponse>) {

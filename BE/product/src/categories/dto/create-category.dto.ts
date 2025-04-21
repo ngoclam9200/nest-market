@@ -14,8 +14,5 @@ export class CreateCategoryDto {
 
   @ApiProperty()
   parent_id: number;
-
-  @IsNotEmpty({ message: 'Chi nhánh không được để trống' })
-  @ApiProperty()
-  branch_id: number;
+ 
 }

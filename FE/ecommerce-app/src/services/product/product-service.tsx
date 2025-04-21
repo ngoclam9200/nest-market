@@ -1,28 +1,65 @@
-import { getData } from "../api-service";
-
-import { DataArray, HttpResponse } from "../../response/http-response";
+import { useFetchData } from "../../hooks/useFetch";
 import { ProductResponse } from "../../response/product";
+import { DataArray } from "../../response/http-response";
+import { ApiConfig } from "../api-config";
 import { API_PRODUCT_URL } from "../api-endpoint";
- 
 
-const domain = import.meta.env.VITE_API_DOMAIN + import.meta.env.VITE_API_PRODUCT_PORT + import.meta.env.VITE_API_PREFIX;
+export const ProductService = {
+  getListProduct: () => {
+    const { request, baseResponse, loading } = useFetchData.Get<DataArray<ProductResponse>>({
+      projectId: ApiConfig.PROJECT_ID.PRODUCT_SERVICE,
+    });
+    return {
+      fetch: (params: { page: number; limit: number , category_id: number }) =>
+        request({
+          endPoint: API_PRODUCT_URL.GET_LIST_PRODUCT,
+          data: params,
+        }),
+      response: baseResponse,
+      loading: loading,
+    };
+  },
 
-export const getListProduct = async (param: { page: number; limit: number }): Promise<HttpResponse<DataArray<ProductResponse>>> => {
-  try {
-    const response = await getData(domain + API_PRODUCT_URL.GET_LIST_PRODUCT, param);
-    return response;
-  } catch (error) {
-    console.error("Error logging in:", error);
-    throw error;
-  }
-};
+  getDetailProduct: () => {
+    const { request, baseResponse, loading } = useFetchData.Get<ProductResponse>({
+      projectId: ApiConfig.PROJECT_ID.PRODUCT_SERVICE,
+    });
+    return {
+      fetch: (id: number) =>
+        request({
+          endPoint: API_PRODUCT_URL.DETAIL_PRODUCT(id),
+        }),
+      response: baseResponse,
+      loading: loading,
+    };
+  },
 
-export const getDetailProduct = async (id: number): Promise<HttpResponse<ProductResponse>> => {
-  try {
-    const response = await getData(domain + API_PRODUCT_URL.DETAIL_PRODUCT(id), {});
-    return response;
-  } catch (error) {
-    console.error("Error fetching product details:", error);
-    throw error;
-  }
+  getNewestProduct: () => {
+    const { request, baseResponse, loading } = useFetchData.Get<ProductResponse[]>({
+      projectId: ApiConfig.PROJECT_ID.PRODUCT_SERVICE,
+    });
+    return {
+      fetch: (params: { count: number }) =>
+        request({
+          endPoint: API_PRODUCT_URL.GET_NEWEST_PRODUCT(),
+          data: params,
+        }),
+      response: baseResponse,
+      loading: loading,
+    };
+  },
+  getPopularProduct: () => {
+    const { request, baseResponse, loading } = useFetchData.Get<ProductResponse[]>({
+      projectId: ApiConfig.PROJECT_ID.PRODUCT_SERVICE,
+    });
+    return {
+      fetch: (params: { count: number }) =>
+        request({
+          endPoint: API_PRODUCT_URL.GET_POPULAR_PRODUCT(),
+          data: params,
+        }),
+      response: baseResponse,
+      loading: loading,
+    };
+  },
 };

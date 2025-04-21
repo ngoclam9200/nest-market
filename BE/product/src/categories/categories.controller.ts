@@ -46,19 +46,17 @@ export class CategoriesController {
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
   @ApiQuery({ name: 'status', required: false, type: Number, example: -1 })
-  @ApiQuery({ name: 'branch_id', required: true, type: Number, example: 1 })
   async findAllCategory(
     @Query() findAllCategoryDTO: FindAllCategoryChildDTO,
     @CurrentUser() currentUser: UserResponse,
   ): Promise<ApiResponse<PaginatedResponse<CategoryResponse>>> {
-    const { page, limit, status, parent_id, branch_id } = findAllCategoryDTO;
+    const { page, limit, status, parent_id } = findAllCategoryDTO;
     try {
       return await this.categoriesService.findAllCategoryChildWithParentId(
         page,
         limit,
         status,
         parent_id,
-        branch_id,
         currentUser,
       );
     } catch (error) {
@@ -68,16 +66,14 @@ export class CategoriesController {
 
   @Get('parent')
   @ApiQuery({ name: 'status', required: false, type: Number, example: -1 })
-  @ApiQuery({ name: 'branch_id', required: true, type: Number, example: 1 })
   async findAllCategoryParent(
     @Query() findAllCategoryDTO: FindAllCategoryParentDTO,
     @CurrentUser() currentUser: UserResponse,
   ): Promise<ApiResponse<PaginatedResponse<CategoryResponse>>> {
-    const { status, branch_id } = findAllCategoryDTO;
+    const { status } = findAllCategoryDTO;
     try {
       return await this.categoriesService.findAllCategoryParent(
         status,
-        branch_id,
         currentUser,
       );
     } catch (error) {
@@ -87,16 +83,15 @@ export class CategoriesController {
 
   @Get('all-child')
   @ApiQuery({ name: 'status', required: false, type: Number, example: -1 })
-  @ApiQuery({ name: 'branch_id', required: true, type: Number, example: 1 })
   async findAllCategoryChild(
     @Query() findAllCategoryDTO: FindAllCategoryParentDTO,
     @CurrentUser() currentUser: UserResponse,
   ): Promise<ApiResponse<PaginatedResponse<CategoryResponse>>> {
-    const { status, branch_id } = findAllCategoryDTO;
+    const { status, parent_id } = findAllCategoryDTO;
     try {
       return await this.categoriesService.findAllCategoryChild(
         status,
-        branch_id,
+        parent_id,
         currentUser,
       );
     } catch (error) {

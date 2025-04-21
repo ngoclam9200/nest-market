@@ -11,7 +11,6 @@ export interface UserResponse {
   roles: Roles[];
   created_at: string;
   updated_at: string;
-  branch_id: number;
   status: boolean;
 }
 
@@ -26,7 +25,6 @@ export function mapUserResponse(user: UserResponse, token?: string) {
     updated_at: user.updated_at,
     roles: user.roles,
     status: user.status,
-    branch_id: user.branch_id,
     access_token: token,
   };
   if (token) {

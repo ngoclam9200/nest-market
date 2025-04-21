@@ -3,11 +3,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
-  Timestamp,
-  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity('media')
@@ -24,8 +20,8 @@ export class MediaEntity {
   @Column()
   size: number;
 
-  @CreateDateColumn()
-  created_at: Timestamp;
+  @CreateDateColumn({ type: 'timestamp' })
+  created_at: string;
 
   @Column({ default: 1 })
   status: number;

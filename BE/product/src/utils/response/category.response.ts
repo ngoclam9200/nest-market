@@ -1,20 +1,23 @@
-import { Timestamp } from 'typeorm';
 import { UserResponse } from './user.response';
 import { CategoryEntity } from 'src/categories/entities/category.entity';
 import { MediaResponse } from './media.response';
-import { status } from '@grpc/grpc-js';
 
-export interface CategoryResponse {
-  id: number;
-  name: string;
-  description: string;
+export class CategoryResponse {
+  id: number = 0;
+  name: string = '';
+  description: string = '';
   media_id: number;
-  created_at: Timestamp;
-  updated_at: Timestamp;
-  user_created?: UserResponse;
-  parent_id: number;
-  code: string;
-  status: number;
+  created_at: string = '';
+  updated_at: string = '';
+  user_created?: UserResponse = new UserResponse();
+  parent_id: number = 0;
+  code: string = '';
+  status: number = 0;
+  constructor(data?: Partial<CategoryResponse>) {
+    if (data) {
+      Object.assign(this, data);
+    }
+  }
 }
 
 export function mapCateGoryResponseWithUser(
@@ -35,7 +38,6 @@ export function mapCateGoryResponseWithUser(
       name: media.name || '',
     },
     status: category.status,
-    branch_id: category.branch_id,
   };
   return response;
 }
@@ -64,7 +66,6 @@ export function mapCateGoryResponseWithAdmin(
     },
     code: category.code,
     status: category.status,
-    branch_id: category.branch_id,
   };
   return response;
 }
