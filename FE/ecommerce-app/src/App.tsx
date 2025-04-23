@@ -7,7 +7,7 @@ import ListProduct from "./pages/list-product/list-product";
 import NotFound from "./pages/not-found/not-found";
 import DetailProduct from "./pages/product-detail/product-detail";
 import CompareProduct from "./pages/compare-product/compare-product";
-import Cart from "./pages/Cart/Cart";
+import Cart from "./pages/shopping-cart/shopping-cart";
 import Login from "./pages/Login/Login";
 import Register from "./pages/Register/Register";
 import Layout from "./components/share/Layout/Layout";

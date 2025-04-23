@@ -10,50 +10,37 @@ import RatingProduct from "../share/rating-product/rating-product";
 import { ProductResponse } from "../../response/product";
 import ManufacturerProduct from "../share/manufacture-product/manufacture-product";
 import PriceProduct from "../share/price-product/price-product";
-import { useCookies } from "react-cookie";
+
 import Toast from "../share/toast/Toast";
-import { useAppSelector } from "../../store/store";
+import { useAppDispatch, useAppSelector } from "../../store/store";
+import { addToCompare } from "../../store/reducers/compare-reducer";
 
 interface ProductItemProps {
   product: ProductResponse;
 }
 
 const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
-  const [cookies, setCookie] = useCookies(["compareProducts"]);
+  const { itemsCompare } = useAppSelector((state) => state.compare);
 
- const handleCompareClick = () => {
-   const isProductInCompare = itemCompare.some((p) => p && p.id === product.id);
+  const dispatch = useAppDispatch();
+  const handleCompareClick = () => {
+    // Check if product already exists in compare list
+    console.log("🚀 ~ handleCompareClick ~ itemsCompare:", itemsCompare);
+      const isProductInCompare = itemsCompare.some((item) => item.product.id === product.id);
 
-   if (!isProductInCompare) {
-     // Create a simplified product object with only necessary properties
-     const simplifiedProduct = {
-       id: product.id,
-       name: product.name,
-       price: product.price,
-       original_price: product.original_price,
-       discount: product.discount,
-       media_default: product.media_default,
-       category: product.category,
-       brand: product.brand,
-       rating: product.rating,
-       stock: product.stock,
-       quantity: product.quantity,
-       description: product.description,
-       origin: product.origin,
-       storage_instructions: product.storage_instructions,
-       expiry_date: product.expiry_date,
-       unit: product.unit,
-     };
-
-     // Dispatch action to add product to compare list
-     dispatch(addToCompare(simplifiedProduct));
-     Toast.ToastSuccess("Sản phẩm đã được thêm vào danh sách so sánh");
-   } else {
-     Toast.ToastWarning("Sản phẩm đã có trong danh sách so sánh");
-   }
- };
-
-
+      if (!isProductInCompare) {
+        if (itemsCompare.length >= 4) {
+          Toast.ToastWarning("Chỉ có thể so sánh tối đa 4 sản phẩm. Vui lòng xóa sản phẩm khác trước khi thêm mới.");
+        } else {
+          // Dispatch action to add product to compare list
+          dispatch(addToCompare( product ));
+          Toast.ToastSuccess("Sản phẩm đã được thêm vào danh sách so sánh");
+        }
+      } else {
+        Toast.ToastWarning("Sản phẩm đã có trong danh sách so sánh");
+      }
+     
+  };
 
   return (
     <>

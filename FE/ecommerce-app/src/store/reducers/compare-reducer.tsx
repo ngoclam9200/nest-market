@@ -1,12 +1,20 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { ProductResponse } from "../../response/product";
 
-interface CompareState {
-  itemCompare: ProductResponse[];
+// Export the CompareItem interface
+export interface CompareItem {
+  product: ProductResponse;
+}
+
+// Export the CompareState interface
+export interface CompareState {
+  itemsCompare: CompareItem[];
+  maxitemsCompare: number; // Maximum number of itemsCompare that can be compared
 }
 
 const initialState: CompareState = {
-  itemCompare: [],
+  itemsCompare: [],
+  maxitemsCompare: 4, // Allow comparing up to 4 products
 };
 
 const compareSlice = createSlice({
@@ -14,16 +22,19 @@ const compareSlice = createSlice({
   initialState,
   reducers: {
     addToCompare: (state, action: PayloadAction<ProductResponse>) => {
-      // Limit to 4 products maximum
-      if (state.itemCompare.length < 4) {
-        state.itemCompare.push(action.payload);
-      }
+      // Check if product already exists in compare list
+      const product = action.payload;
+      state.itemsCompare.push({ product });
+      // Check if we've reached the maximum number of itemsCompare
     },
+
     removeFromCompare: (state, action: PayloadAction<number>) => {
-      state.itemCompare = state.itemCompare.filter((item) => item.id !== action.payload);
+      const productId = action.payload;
+      state.itemsCompare = state.itemsCompare.filter((item) => item.product.id !== productId);
     },
+
     clearCompare: (state) => {
-      state.itemCompare = [];
+      state.itemsCompare = [];
     },
   },
 });

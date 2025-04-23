@@ -27,8 +27,7 @@ const Header = () => {
   const { fetch: getListParentCategory, response: resListParentCategory } = CategoryService.getListParentCategory();
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
    const { totalItemCarts } = useAppSelector((state) => state.cart);
-    const { totalItemCompare } = useAppSelector((state) => state.compare);
-
+const { itemsCompare } = useAppSelector((state) => state.compare);
   useEffect(() => {
     getListParentCategory({ status: 1 });
   }, []);
@@ -85,7 +84,7 @@ const Header = () => {
             <div className="col-sm-5 header-action-right">
               <ul className="list list-inline align-items-center d-flex m-0 justify-content-end gap-2">
                 <li className="list-inline-item-icon d-flex">
-                  <NotifyCount icon={IconCompare} count={totalItemCompare} text={"So sánh"} />
+                  <NotifyCount icon={IconCompare} count={itemsCompare.length} text={"So sánh"} />
                 </li>
                 <li className="list-inline-item-icon d-flex">
                   <NotifyCount icon={IConHeart} count={1} text={"Yêu thích"} />
