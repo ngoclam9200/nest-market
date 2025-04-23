@@ -24,11 +24,14 @@ const ListProduct = () => {
   const [value, setValue] = useState<number[]>([startValue, endValue]);
   const { fetch: getListParentCategory, response: resListParentCategories } = CategoryService.getListParentCategory();
   const { fetch: getListChildCategory, response: resListChildCategories } = CategoryService.getAllChildCategory();
-  const { fetch: getListProduct, response: resListProducts } = ProductService.getListProduct();
+  const { fetch: getListProduct, response: resListProducts, loading: isLoadingProduct } = ProductService.getListProduct();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
+  const [sort_by, setSortBy] = useState<number>(-1);
   const [listProduct, setListProduct] = useState<any[]>([]);
+  const [isFilterProduct, setIsFilterProduct] = useState(false);
+  const [isCallApiProduct, setIsCallApiProduct] = useState(false);
 
   const [parentCategory, setParentCategory] = useState<CategoryResponse[]>([]);
   const [currentCategory, setCurrentCategory] = useState<CategoryResponse>(new CategoryResponse());
@@ -65,16 +68,52 @@ const ListProduct = () => {
 
   useEffect(() => {
     if (categoryState) {
+      console.log("🚀 ~ useEffect ~ categoryState:", categoryState);
       setCurrentCategory(categoryState);
+
+      setIsCallApiProduct(true);
     }
   }, [categoryState]);
 
   useEffect(() => {
-    if (currentCategory.id) {
-      setPage(1);
-      getListProduct({ category_id: currentCategory.id, page: page, limit: limit });
+    if (currentCategory.id && (isCallApiProduct || page > 1)) {
+      // Build query parameters
+      const queryParams = {
+        category_id: currentCategory.id,
+        page: page,
+        limit: limit,
+        sort_by: sort_by,
+      };
+
+      // Add price filter parameters if filtering by price
+      if (isFilterProduct) {
+        Object.assign(queryParams, {
+          from_price: startValue,
+          to_price: endValue,
+        });
+      }
+
+      // Fetch products with the appropriate parameters
+      getListProduct(queryParams);
     }
-  }, [currentCategory, page, limit]);
+  }, [page, limit, isCallApiProduct, sort_by]);
+
+  useEffect(() => {
+    // Reset to page 1 when category or filter changes
+    if (currentCategory.id || isFilterProduct) {
+      if (page !== 1) {
+        setPage(1);
+      } else {
+        setIsCallApiProduct(true);
+      }
+    }
+  }, [currentCategory.id]); // Remove isFilterProduct from dependencies
+
+  useEffect(() => {
+    if (isFilterProduct) {
+      setIsCallApiProduct(true);
+    }
+  }, [isFilterProduct]);
 
   useEffect(() => {
     if (resListChildCategories) {
@@ -96,6 +135,8 @@ const ListProduct = () => {
       if (isSuccess(resListProducts)) {
         setListProduct(resListProducts.data.list);
         setTotal(resListProducts.data.total_record);
+        setIsFilterProduct(false);
+        setIsCallApiProduct(false);
       }
     }
   }, [resListProducts]);
@@ -120,15 +161,15 @@ const ListProduct = () => {
         <div className="container-fluid mb-30">
           <div className="row flex-row-reverse">
             <div className="col-lg-4-5">
-              <ProductFilter total={total} />
-              <ProductGrid listProduct={listProduct} />
+              <ProductFilter total={total} limit={limit} setLimit={setLimit} setSortBy={setSortBy} sort_by={sort_by} setIsCallApiProduct={setIsCallApiProduct} />
+              <ProductGrid loading={isLoadingProduct} listProduct={listProduct} />
             </div>
 
             <div className="col-lg-1-5 primary-sidebar sticky-sidebar">
               <div className="theiaStickySidebar">
                 <CategorySidebar parentCategory={parentCategory} handleClickCategory={handleClickCategory} setCurrentCategory={setCurrentCategory} />
 
-                <PriceFilter value={value} handleChange={handleChange} startValue={startValue} endValue={endValue} />
+                <PriceFilter value={value} handleChange={handleChange} startValue={startValue} endValue={endValue} setIsFilterProduct={setIsFilterProduct} />
 
                 <NewProductsSidebar />
                 <BannerSection />

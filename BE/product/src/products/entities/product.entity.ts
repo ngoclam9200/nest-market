@@ -58,4 +58,16 @@ export class ProductEntity {
 
   @Column('float', { default: 3.5 })
   rating: number;
+
+  @Column({ default: '' })
+  brand: string;
+
+  @Column({ default: '' })
+  origin: string;
+
+  @Column({ default: '' })
+  expiry_date: string;
+
+  @Column({ default: '' })
+  storage_instructions: string;
 }

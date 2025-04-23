@@ -20,14 +20,17 @@ export class ProductResponse {
   status: number = 0;
   // media: MediaResponse = new MediaResponse();
   media_id: number = 0;
-  category : CategoryResponse = new CategoryResponse()
+  category: CategoryResponse = new CategoryResponse();
   media_default: MediaResponse = new MediaResponse();
   media: MediaResponse[] = [];
   unit: string = "";
   discount: number = 0;
   quantity: number = 0;
   rating: number = 0;
-
+  brand: string = "";
+  origin: string = "";
+  expiry_date: string = "";
+  storage_instructions: string = "";
 
   constructor(data?: Partial<ProductResponse>) {
     if (data) {

@@ -1,4 +1,4 @@
-import "./BasicBreadcrumbs.scss";
+import "./basic-breadcrumbs.scss";
 import * as React from "react";
 import Typography from "@mui/material/Typography";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
@@ -25,22 +25,12 @@ const BasicBreadcrumbs: React.FC<BasicBreadcrumbsProps> = ({ breadcrumb }) => {
           const Icon = item.icon;
 
           return item.href ? (
-            <Link
-              key={index}
-              underline="none"
-              sx={{ display: "flex", alignItems: "center" }}
-              color="inherit"
-              href={item.href}
-            >
-              {Icon && <Icon sx={{ mr: 0.5 , mb:0 }} fontSize="inherit" />}
+            <Link key={index} underline="none" sx={{ display: "flex", alignItems: "center" }} color="inherit" href={item.href}>
+              {Icon && <Icon sx={{ mr: 0.5, mb: 0 }} fontSize="inherit" />}
               {item.name}
             </Link>
           ) : (
-            <Typography
-              key={index}
-              sx={{ display: "flex", alignItems: "center" }}
-              color="text.primary"
-            >
+            <Typography key={index} sx={{ display: "flex", alignItems: "center" }} color="text.primary">
               {Icon && <Icon sx={{ mr: 0.5 }} fontSize="inherit" />}
               {item.name}
             </Typography>

@@ -45,6 +45,11 @@ function mapProductResponseBase(
     created_at: product.created_at,
     updated_at: product.updated_at,
     status: product.status,
+    brand: product.brand,
+    origin: product.origin,
+    expiry_date: product.expiry_date,
+    storage_instructions: product.storage_instructions,
+
     media: list_media,
     media_default,
     category : category ? category : new CategoryResponse(),

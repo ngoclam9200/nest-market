@@ -27,7 +27,7 @@ const PopularProduct = () => {
     <>
       <div className="w-full px-4">
         <div className="title-popular-product">
-          <h2>Popular Product</h2>
+          <h2>Sản phẩm mới</h2>
         </div>
 
         <div className="tab-content">

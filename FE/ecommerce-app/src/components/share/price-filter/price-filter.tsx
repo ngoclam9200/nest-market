@@ -8,9 +8,10 @@ interface PriceFilterProps {
   handleChange: (event: Event, newValue: number | number[]) => void;
   startValue: number;
   endValue: number;
+  setIsFilterProduct : (value: boolean) => void;
 }
 
-const PriceFilter: React.FC<PriceFilterProps> = ({ value, handleChange, startValue, endValue }) => {
+const PriceFilter: React.FC<PriceFilterProps> = ({ value, handleChange, startValue, endValue, setIsFilterProduct }) => {
   function valuetext(value: number) {
     return `${value}°C`;
   }
@@ -59,7 +60,7 @@ const PriceFilter: React.FC<PriceFilterProps> = ({ value, handleChange, startVal
         </div>
       </div>
       <div className="d-flex justify-content-center">
-        <a className="btn btn-sm btn-default">
+        <a className="btn btn-sm btn-default" onClick={() => setIsFilterProduct(true)}>
           <i className="fi-rs-filter mr-5"></i> Lọc
         </a>
       </div>

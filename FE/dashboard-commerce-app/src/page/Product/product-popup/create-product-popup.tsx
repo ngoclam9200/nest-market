@@ -5,7 +5,6 @@ import { Formik, Form, Field, ErrorMessage, FormikHelpers } from "formik";
 import * as Yup from "yup";
 import Popup from "../../../components/share/Popup/Popup";
 import Toast from "../../../components/share/Toast/Toast";
-import { getCookie } from "../../../services/cookie";
 import { upload } from "../../../services/media/media-service";
 import { ProductService } from "../../../services/product/product-service";
 import { removeNonNumeric, formatCurrency } from "../../../utils/FormatCurrency";
@@ -28,6 +27,10 @@ interface ProductFormValues {
   categoryId: number;
   description: string;
   quantity: number;
+  brand: string;
+  origin: string;
+  expiry_date: string;
+  storage_instructions:string
 }
 
 const CreateProductPopup: React.FC<CreateProductProps> = ({ open, setRefresh, setIsOpenCreate }) => {
@@ -47,6 +50,10 @@ const CreateProductPopup: React.FC<CreateProductProps> = ({ open, setRefresh, se
     categoryId: -1,
     description: "",
     quantity: 0,
+    brand: "",
+    origin: "",
+    expiry_date: "",
+    storage_instructions:""
   };
 
   const validationSchema = Yup.object({
@@ -119,6 +126,10 @@ const CreateProductPopup: React.FC<CreateProductProps> = ({ open, setRefresh, se
       discount: values.discount,
       unit: values.unit,
       quantity: values.quantity,
+      brand: values.brand,
+      origin: values.origin,
+      expiry_date: values.expiry_date,
+      storage_instructions:values.storage_instructions
     });
   };
 
@@ -198,6 +209,35 @@ const CreateProductPopup: React.FC<CreateProductProps> = ({ open, setRefresh, se
                     />
                     <ErrorMessage name="discount" component="div" className="text-danger" />
                   </div>
+
+                  <label>Thương hiệu</label>
+                  <div className="mb-3">
+                    <Field
+                      type="text"
+                      name="brand"
+                      className="form-control"
+                      placeholder="Thương hiệu"
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        setError("");
+                        handleChange(e);
+                      }}
+                    />
+                    <ErrorMessage name="brand" component="div" className="text-danger" />
+                  </div>
+                  <label>Nơi sản xuất</label>
+                  <div className="mb-3">
+                    <Field
+                      type="text"
+                      name="origin"
+                      className="form-control"
+                      placeholder="Nơi sản xuất"
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        setError("");
+                        handleChange(e);
+                      }}
+                    />
+                    <ErrorMessage name="origin" component="div" className="text-danger" />
+                  </div>
                 </Grid>
 
                 {/* Right Column */}
@@ -258,6 +298,35 @@ const CreateProductPopup: React.FC<CreateProductProps> = ({ open, setRefresh, se
                       }}
                     />
                     <ErrorMessage name="quantity" component="div" className="text-danger" />
+                  </div>
+
+                  <label>Hạn sử dụng</label>
+                  <div className="mb-3">
+                    <Field
+                      type="text"
+                      name="expiry_date"
+                      className="form-control"
+                      placeholder="Hạn sử dụng"
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        setError("");
+                        handleChange(e);
+                      }}
+                    />
+                    <ErrorMessage name="expiry_date" component="div" className="text-danger" />
+                  </div>
+                  <label>Bảo quản</label>
+                  <div className="mb-3">
+                    <Field
+                      type="text"
+                      name="storage_instructions"
+                      className="form-control"
+                      placeholder="Bảo quản"
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        setError("");
+                        handleChange(e);
+                      }}
+                    />
+                    <ErrorMessage name="storage_instructions" component="div" className="text-danger" />
                   </div>
                 </Grid>
                 <Grid item className="pt-0" md={12}>

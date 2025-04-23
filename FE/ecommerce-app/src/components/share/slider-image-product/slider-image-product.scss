@@ -2,11 +2,11 @@
   .product-image-slider {
     background-color: #fff;
     margin-bottom: 30px;
-    border-radius: 15px;
-    border: 1px solid #ececec;
+    // border-radius: 15px;
+    // border: 1px solid #ececec;
     overflow: hidden;
     .item-img {
-      height: 400px;
+      // height: 400px;
       img {
         max-height: 100%;
       }
@@ -23,10 +23,10 @@
       opacity: 0;
       // width: 100%;
     }
-    .left{
+    .left {
       left: 0;
     }
-     .right{
+    .right {
       right: 0;
     }
     .item {
@@ -56,5 +56,12 @@
       opacity: 1;
       // width: 100%;
     }
+  }
+  figure div {
+    width: 100%;
+    height: 100%;
+  }
+  figure div img {
+    border-radius: 15px;
   }
 }

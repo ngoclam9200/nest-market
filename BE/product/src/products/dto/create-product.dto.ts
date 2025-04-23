@@ -15,8 +15,6 @@ export class CreateProductDto {
   @ApiProperty()
   price: number;
 
-  
-
   @ApiProperty()
   default_media_id: number;
 
@@ -33,4 +31,16 @@ export class CreateProductDto {
 
   @ApiProperty()
   quantity: number;
+  @ApiProperty()
+  brand: string;
+
+  @ApiProperty()
+  origin: string;
+
+  @ApiProperty()
+  expiry_date: string;
+
+  @ApiProperty()
+  storage_instructions: string;
+ 
 }

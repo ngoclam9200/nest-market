@@ -11,7 +11,13 @@ import {
   PaginatedResponse,
 } from 'src/utils/interface/response.interface';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import {
+  Between,
+  In,
+  LessThanOrEqual,
+  MoreThanOrEqual,
+  Repository,
+} from 'typeorm';
 import {
   createPaginatedResponse,
   createResponse,
@@ -61,23 +67,48 @@ export class ProductService {
     limit: number = 10,
     status: number,
     category_id: number,
+    from_price: number,
+    to_price: number,
+    sort_by: number = 0,
     currentUser: UserResponse,
   ): Promise<ApiResponse<PaginatedResponse<ProductResponse>>> {
     try {
       const get_all: any = {};
       if (category_id != GetTypeEnum.ALL) {
         get_all.category_id = category_id;
-      } 
+      }
       if (status == GetTypeEnum.ALL) {
         get_all.status = In([0, 1]);
       } else {
         get_all.status = status;
+      }
+      if (to_price) {
+        if (from_price != GetTypeEnum.ALL && to_price != GetTypeEnum.ALL) {
+          get_all.price = Between(from_price, to_price);
+        } else if (from_price != GetTypeEnum.ALL) {
+          get_all.price = MoreThanOrEqual(from_price);
+        } else if (to_price != GetTypeEnum.ALL) {
+          get_all.price = LessThanOrEqual(to_price);
+        }
+      }
+
+      let orderOptions = {};
+      if (sort_by === 1) {
+        // Sort by price from low to high
+        orderOptions = { price: 'ASC' };
+      } else if (sort_by === 2) {
+        // Sort by price from high to low
+        orderOptions = { price: 'DESC' };
+      } else {
+        // Default sorting (by id descending)
+        orderOptions = { id: 'DESC' };
       }
 
       const [list, total_record] = await this.productRepository.findAndCount({
         where: get_all,
         skip: (page - 1) * limit,
         take: limit,
+        order: orderOptions,
       });
 
       const mappedProductWithUserCreated = await Promise.all(
@@ -224,6 +255,7 @@ export class ProductService {
       product.rating = parseFloat(
         (Math.round((4 + Math.random()) * 10) / 10).toFixed(1),
       );
+      product.stock = product.quantity;
 
       product = await this.productRepository.save(product);
       console.log('🚀 ~ ProductService ~ product:', product);

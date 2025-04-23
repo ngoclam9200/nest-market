@@ -25,6 +25,10 @@ export class ProductResponse {
   unit: string = "";
   discount: number = 0;
   quantity: number = 0;
+  brand: string = "";
+  origin: string = "";
+  expiry_date: string = "";
+  storage_instructions: string = "";
 
 
   constructor(data?: Partial<ProductResponse>) {

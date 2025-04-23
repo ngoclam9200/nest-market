@@ -45,13 +45,16 @@ export class ProductsController {
     @Query() findAllProductDTO: FindAllProductDTO,
     @CurrentUser() currentUser: UserResponse,
   ): Promise<ApiResponse<PaginatedResponse<ProductResponse>>> {
-    const { page, limit, status , category_id } = findAllProductDTO;
+    const { page, limit, status , category_id , from_price, to_price , sort_by} = findAllProductDTO;
     try {
       return await this.productsService.findAllProduct(
         page,
         limit,
         status,
         category_id,
+        from_price,
+        to_price,
+        sort_by || 0,
         currentUser,
       );
     } catch (error) {

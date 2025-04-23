@@ -35,6 +35,10 @@ export const ProductService = {
         discount: number;
         unit: string;
         quantity: number;
+        brand: string;
+        origin: string;
+        expiry_date: string;
+        storage_instructions: string;
       }) =>
         request({
           endPoint: API_PRODUCT_URL.CREATE_PRODUCT,
@@ -60,6 +64,10 @@ export const ProductService = {
         unit: string;
         price: number;
         quantity: number;
+        brand: string;
+        origin: string;
+        expiry_date: string;
+        storage_instructions: string;
       }) =>
         request({
           endPoint: API_PRODUCT_URL.UPDATE_PRODUCT(),

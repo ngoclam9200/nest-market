@@ -37,4 +37,16 @@ export class UpdateProductDto {
 
   @ApiProperty()
   quantity: number;
+
+  @ApiProperty()
+  brand: string;
+
+  @ApiProperty()
+  origin: string;
+
+  @ApiProperty()
+  expiry_date: string;
+
+  @ApiProperty()
+  storage_instructions: string;
 }

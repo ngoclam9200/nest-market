@@ -41,7 +41,7 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ parentCategory, handl
                 <List component="div" disablePadding>
                   {item.children?.map((child) => (
                     <ListItemButton key={child.id}>
-                      <a style={{ wordBreak: "break-all" }} onClick={() => setCurrentCategory(child)} className="ml-15 breaks-all">
+                      <a style={{ wordBreak: "break-all" }} onClick={() => setCurrentCategory(child)} className="ml-15 breaks-all w-full">
                         <p className="flex items-center">{child.name}</p>
                       </a>
                     </ListItemButton>

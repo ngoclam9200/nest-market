@@ -1,4 +1,4 @@
-import QuantityInput from "../../components/share/QuantityInput/QuantityInput";
+import QuantityInput from "../../components/share/quantity-input/quantity-input";
 import RatingProduct from "../../components/share/rating-product/rating-product";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import "./Cart.scss";

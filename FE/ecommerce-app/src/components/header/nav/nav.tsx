@@ -11,20 +11,13 @@ import { CategoryResponse } from "../../../response/category";
 import { isSuccess } from "../../../services/base-response";
 import { CategoryService } from "../../../services/category/category-service";
 import { domainMedia } from "../../../enums/Enum";
+import { useAppSelector } from "../../../store/store";
 
 interface isScrollProp {
   isScrolled: boolean;
 }
 const Nav: React.FC<isScrollProp> = ({ isScrolled }) => {
-  const items = [
-    {
-      title: "Item 1",
-    },
-    {
-      title: "Item 2",
-    },
-    { title: "Item 3" },
-  ];
+ 
   const [isOpenDropDown, setisOpenDropDown] = useState(false);
   const { fetch: getListParentCategory, response: resListParentCategory } = CategoryService.getListParentCategory();
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
@@ -71,57 +64,46 @@ const Nav: React.FC<isScrollProp> = ({ isScrolled }) => {
                 <ul className="list list-inline mb-0">
                   <li className="list-inline-item">
                     <Button>
-                      <NavLink to="deals">Deals</NavLink>
-                    </Button>
-                  </li>
-                  <li className="list-inline-item">
-                    <Button>
                       <NavLink to="home" className={({ isActive }) => (isActive ? "active" : "")}>
-                        Home
+                        Trang chủ
                         <KeyboardArrowDownIcon></KeyboardArrowDownIcon>
                       </NavLink>
                     </Button>
                   </li>
+
                   <li className="list-inline-item">
                     <Button>
-                      <NavLink to="about">About</NavLink>
-                    </Button>
-                  </li>
-                  <li className="list-inline-item">
-                    <Button>
-                      <NavLink to="shop">Shop</NavLink>
-                      <KeyboardArrowDownIcon></KeyboardArrowDownIcon>
-                    </Button>
-                  </li>
-                  <li className="list-inline-item">
-                    <Button>
-                      <NavLink to="vendors">Vendors</NavLink>
+                      <NavLink to="shop">Sản phẩm</NavLink>
                       <KeyboardArrowDownIcon></KeyboardArrowDownIcon>
                     </Button>
                   </li>
                   <li className="list-inline-item position-static">
                     <Button>
-                      <NavLink to="mega-menu">Mega menu</NavLink>
+                      <NavLink to="mega-menu">Danh mục</NavLink>
                       <KeyboardArrowDownIcon></KeyboardArrowDownIcon>
                     </Button>
                     <MegaMenu></MegaMenu>
                   </li>
                   <li className="list-inline-item">
                     <Button>
+                      <NavLink to="deals">Khuyến mãi</NavLink>
+                    </Button>
+                  </li>
+
+                  <li className="list-inline-item">
+                    <Button>
                       <NavLink to="blogs">Blogs</NavLink>
                       <KeyboardArrowDownIcon></KeyboardArrowDownIcon>
                     </Button>
                   </li>
-                  <li className="list-inline-item list-inline-item1">
+                  <li className="list-inline-item">
                     <Button>
-                      <NavLink to="page">Pages</NavLink>
-                      <KeyboardArrowDownIcon></KeyboardArrowDownIcon>
+                      <NavLink to="about">Về chúng tôi</NavLink>
                     </Button>
-                    <Dropdown items={items} />
                   </li>
                   <li className="list-inline-item">
                     <Button>
-                      <NavLink to="contact">Contact</NavLink>
+                      <NavLink to="contact">Liên hệ</NavLink>
                     </Button>
                   </li>
                 </ul>
@@ -131,8 +113,8 @@ const Nav: React.FC<isScrollProp> = ({ isScrolled }) => {
               <div className="hotline flex items-center">
                 <HeadsetMicOutlinedIcon></HeadsetMicOutlinedIcon>
                 <p className="flex flex-col mb-0">
-                  <span className="phone-number">1900 - 888</span>
-                  <span className="text-support">24/7 Support Center</span>
+                  <span className="phone-number">0364681528</span>
+                  <span className="text-support">Hỗ trợ 24/7</span>
                 </p>
               </div>
             </div>

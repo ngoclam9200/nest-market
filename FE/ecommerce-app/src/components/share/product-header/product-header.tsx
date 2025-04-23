@@ -1,5 +1,5 @@
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
-import BasicBreadcrumbs from "../../../components/share/BasicBreadcrumbs/BasicBreadcrumbs";
+import BasicBreadcrumbs from "../basic-breadcrumbs/basic-breadcrumbs";
 
 interface ProductHeaderProps {
   categoryName: string;

@@ -3,7 +3,7 @@ import Slider from "react-slick";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useEffect, useRef, useState } from "react";
-import FormSendEmail from "../../../components/share/FormSendEmail/FormSendEmail";
+import FormSendEmail from "../../../components/share/form-send-mail/form-send-mail";
 import { BannerService } from "../../../services/banner/banner-service";
 import { isSuccess } from "../../../services/base-response";
 import { BannerResponse } from "../../../response/banner";
@@ -45,10 +45,10 @@ const HomeSlider = () => {
       <section className="home-slider">
         <div className="container-fluid ">
           <div className="button-arrow left">
-            <ArrowBackIcon onClick={previous}></ArrowBackIcon>
+            <ArrowBackIcon className="m-0" onClick={previous}></ArrowBackIcon>
           </div>
           <div className="button-arrow right">
-            <ArrowForwardIcon onClick={next}></ArrowForwardIcon>
+            <ArrowForwardIcon className="m-0" onClick={next}></ArrowForwardIcon>
           </div>
           <Slider
             ref={(slider: any) => {
@@ -56,14 +56,11 @@ const HomeSlider = () => {
             }}
             {...settings}
           >
-          
             {banner.map((item, index) => (
               <div key={index} className="item">
-                <img src={domainMedia+item.media.url} className="w-100"></img>
+                <img src={domainMedia + item.media.url} className="w-100"></img>
                 <div className="slider-content">
-                  <h1 className="display-2 mb-40">
-                    {item.title}
-                  </h1>
+                  <h1 className="display-2 mb-40">{item.title}</h1>
                   <p className="mb-65 mt-20 ">{item.description}</p>
                   <FormSendEmail></FormSendEmail>
                 </div>

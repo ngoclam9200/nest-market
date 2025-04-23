@@ -1,4 +1,4 @@
-import "./FormSendEmail.scss";
+import "./form-send-mail.scss";
 
 const FormSendEmail = () => {
   return (

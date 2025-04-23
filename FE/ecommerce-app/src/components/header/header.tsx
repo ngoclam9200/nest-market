@@ -21,10 +21,14 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { CategoryService } from "../../services/category/category-service";
 import { isSuccess } from "../../services/base-response";
 import { CategoryResponse } from "../../response/category";
+import { useAppSelector } from "../../store/store";
 const Header = () => {
   const [isOpenDropDown, setisOpenDropDown] = useState(false);
   const { fetch: getListParentCategory, response: resListParentCategory } = CategoryService.getListParentCategory();
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
+   const { totalItemCarts } = useAppSelector((state) => state.cart);
+    const { totalItemCompare } = useAppSelector((state) => state.compare);
+
   useEffect(() => {
     getListParentCategory({ status: 1 });
   }, []);
@@ -79,15 +83,15 @@ const Header = () => {
               </div>
             </div>
             <div className="col-sm-5 header-action-right">
-              <ul className="list list-inline align-items-center d-flex m-0 justify-content-end">
+              <ul className="list list-inline align-items-center d-flex m-0 justify-content-end gap-2">
                 <li className="list-inline-item-icon d-flex">
-                  <NotifyCount icon={IconCompare} count={1} text={"Compare"} />
+                  <NotifyCount icon={IconCompare} count={totalItemCompare} text={"So sánh"} />
                 </li>
                 <li className="list-inline-item-icon d-flex">
-                  <NotifyCount icon={IConHeart} count={1} text={"WishList"} />
+                  <NotifyCount icon={IConHeart} count={1} text={"Yêu thích"} />
                 </li>
                 <li className="list-inline-item-icon d-flex">
-                  <NotifyCount icon={IconCart} count={10} text={"Cart"} />
+                  <NotifyCount icon={IconCart} count={totalItemCarts} text={"Giỏ hàng"} />
                 </li>
                 <ClickAwayListener onClickAway={() => setisOpenDropDown(false)}>
                   <li className="list-inline-item-icon d-flex " onClick={() => setisOpenDropDown(!isOpenDropDown)}>
@@ -96,7 +100,7 @@ const Header = () => {
                       <ul className="dropdownMenu">
                         <li onClick={() => setisOpenDropDown(!isOpenDropDown)}>
                           <Button>
-                            <PersonIcon></PersonIcon> My Account
+                            <PersonIcon></PersonIcon> Tài khoản
                           </Button>
                         </li>
                         <li onClick={() => setisOpenDropDown(!isOpenDropDown)}>

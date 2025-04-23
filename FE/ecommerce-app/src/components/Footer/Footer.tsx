@@ -1,4 +1,4 @@
-import FormSendEmail from "../share/FormSendEmail/FormSendEmail";
+import FormSendEmail from "../share/form-send-mail/form-send-mail";
 import "./Footer.scss";
 import Banner9 from "../../assets/images/banner-9.png";
 import Icon1 from "../../assets/images/footer/icon-1.svg";
@@ -123,18 +123,13 @@ const Footer = () => {
                     <a className="mb-15">
                       <img src={Logo} alt="logo" />
                     </a>
-                    <p className="font-lg text-heading">
-                      Awesome grocery store website template
-                    </p>
+                    <p className="font-lg text-heading">Awesome grocery store website template</p>
                   </div>
                   <ul className="contact-infor">
                     <li>
                       <img src={IconLocaction} alt="" />
                       <strong>Address: </strong>
-                      <span>
-                        5171 W Campbell Ave undefined Kent, Utah 53127 United
-                        States
-                      </span>
+                      <span>5171 W Campbell Ave undefined Kent, Utah 53127 United States</span>
                     </li>
                     <li>
                       <img src={IconContact} alt="" />

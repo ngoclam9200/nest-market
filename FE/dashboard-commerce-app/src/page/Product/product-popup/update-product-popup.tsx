@@ -31,6 +31,10 @@ interface ProductFormValues {
   categoryId: number;
   description: string;
   quantity: number;
+  brand: string;
+  origin: string;
+  expiry_date: string;
+  storage_instructions: string;
 }
 
 const UpdateProductPopup: React.FC<UpdateProductProps> = ({ open, setRefresh, setIsOpenUpdate, productId }) => {
@@ -38,13 +42,13 @@ const UpdateProductPopup: React.FC<UpdateProductProps> = ({ open, setRefresh, se
   const [existingImages, setExistingImages] = useState<MediaResponse[]>([]);
   const [listCategory, setListCategory] = useState<CategoryResponse[]>([]);
   const [error, setError] = useState<string>("");
- 
+
   const [productData, setProductData] = useState<ProductResponse>(new ProductResponse());
   const formikRef = useRef<any>(null);
   const domainMedia = import.meta.env.VITE_API_DOMAIN + import.meta.env.VITE_API_MEDIA_PORT + "/";
 
   const { fetch: getAllChildCategory, response: listCategoryResponse } = CategoryService.getAllChildCategory();
-  const { fetch: getDetailProduct, response: resDetail , loading :loading } = ProductService.getDetailProduct();
+  const { fetch: getDetailProduct, response: resDetail, loading: loading } = ProductService.getDetailProduct();
   const { fetch: updateProduct, response: resUpdate } = ProductService.updateProduct();
 
   const initialValues: ProductFormValues = {
@@ -56,6 +60,10 @@ const UpdateProductPopup: React.FC<UpdateProductProps> = ({ open, setRefresh, se
     categoryId: productData?.category.id || -1,
     description: productData?.description || "",
     quantity: productData?.quantity || 0,
+    brand: productData?.brand || "",
+    origin: productData?.origin || "",
+    expiry_date: productData?.expiry_date || "",
+    storage_instructions: productData?.storage_instructions || "",
   };
 
   const validationSchema = Yup.object({
@@ -164,6 +172,10 @@ const UpdateProductPopup: React.FC<UpdateProductProps> = ({ open, setRefresh, se
       price: price_product,
       quantity: values.quantity,
       list_media_id: list_media_id,
+      brand: values.brand,
+      origin: values.origin,
+      expiry_date: values.expiry_date,
+      storage_instructions: values.storage_instructions,
     });
   };
 
@@ -247,6 +259,36 @@ const UpdateProductPopup: React.FC<UpdateProductProps> = ({ open, setRefresh, se
                       />
                       <ErrorMessage name="discount" component="div" className="text-danger" />
                     </div>
+                    <label>Thương hiệu</label>
+                    <div className="mb-3">
+                      <Field
+                        type="text"
+                        name="brand"
+                        className="form-control"
+                        placeholder="Thương hiệu"
+                        values={values.brand}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          setError("");
+                          handleChange(e);
+                        }}
+                      />
+                      <ErrorMessage name="brand" component="div" className="text-danger" />
+                    </div>
+                    <label>Nơi sản xuất</label>
+                    <div className="mb-3">
+                      <Field
+                        type="text"
+                        name="origin"
+                        className="form-control"
+                        placeholder="Nơi sản xuất"
+                        values={values.origin}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          setError("");
+                          handleChange(e);
+                        }}
+                      />
+                      <ErrorMessage name="origin" component="div" className="text-danger" />
+                    </div>
                   </Grid>
 
                   <Grid item xs={12} md={6}>
@@ -299,7 +341,7 @@ const UpdateProductPopup: React.FC<UpdateProductProps> = ({ open, setRefresh, se
                         name="quantity"
                         className="form-control"
                         placeholder="Số lượng"
-                        value={values.price}
+                        value={values.quantity}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                           const numericValue = removeNonNumeric(e.target.value);
                           setFieldValue("quantity", formatCurrency(Number(numericValue)));
@@ -307,6 +349,37 @@ const UpdateProductPopup: React.FC<UpdateProductProps> = ({ open, setRefresh, se
                         }}
                       />
                       <ErrorMessage name="quantity" component="div" className="text-danger" />
+                    </div>
+
+                    <label>Hạn sử dụng</label>
+                    <div className="mb-3">
+                      <Field
+                        type="text"
+                        name="expiry_date"
+                        className="form-control"
+                        placeholder="Hạn sử dụng"
+                        value={values.expiry_date}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          setError("");
+                          handleChange(e);
+                        }}
+                      />
+                      <ErrorMessage name="expiry_date" component="div" className="text-danger" />
+                    </div>
+                    <label>Bảo quản</label>
+                    <div className="mb-3">
+                      <Field
+                        type="text"
+                        name="storage_instructions"
+                        className="form-control"
+                        placeholder="Bảo quản"
+                        value={values.storage_instructions}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          setError("");
+                          handleChange(e);
+                        }}
+                      />
+                      <ErrorMessage name="storage_instructions" component="div" className="text-danger" />
                     </div>
                   </Grid>
                   <Grid item className="pt-0" md={12}>
