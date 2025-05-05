@@ -104,7 +104,7 @@ export class CategoriesService {
                 where: { id: cate.parent_id },
               })
             : null;
-          if (currentUser.roles.includes(Roles.ADMIN)) {
+          if (currentUser && currentUser.roles.includes(Roles.ADMIN)) {
             return mapCateGoryResponseWithAdmin(
               exsistParentCategory,
               cate,
@@ -181,7 +181,7 @@ export class CategoriesService {
                 where: { id: cate.parent_id },
               })
             : null;
-          if (currentUser.roles.includes(Roles.ADMIN)) {
+          if ( currentUser && currentUser.roles.includes(Roles.ADMIN)) {
             return mapCateGoryResponseWithAdmin(
               exsistParentCategory,
               cate,
@@ -211,7 +211,7 @@ export class CategoriesService {
       const media = await lastValueFrom(
         this.mediaServiceGrpc.getMedia({ media_id: category.media_id }),
       );
-      if (currentUser.roles.includes(Roles.ADMIN)) {
+      if (currentUser && currentUser.roles.includes(Roles.ADMIN)) {
         let user_created_and_updated: ApiResponse<UserResponse[]> =
           await lastValueFrom(
             this.userServiceGrpc.getUsersByIds({
@@ -308,7 +308,7 @@ export class CategoriesService {
               })
             : null;
 
-          if (currentUser.roles.includes(Roles.ADMIN)) {
+          if (currentUser && currentUser.roles.includes(Roles.ADMIN)) {
             return mapCateGoryResponseWithAdmin(
               exsistParentCategory,
               cate,
@@ -346,7 +346,7 @@ export class CategoriesService {
         this.mediaServiceGrpc.getMedia({ media_id: category.media_id }),
       );
 
-      if (currentUser.roles.includes(Roles.ADMIN)) {
+      if (currentUser && currentUser.roles.includes(Roles.ADMIN)) {
         let user_created_and_updated: ApiResponse<UserResponse[]> =
           await lastValueFrom(
             this.userServiceGrpc.getUsersByIds({

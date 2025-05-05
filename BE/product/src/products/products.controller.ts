@@ -28,6 +28,7 @@ import { UserResponse } from 'src/utils/response/user.response';
 import { DeleteProductDto } from './dto/delete-product.dto';
 import { ProductService } from './products.service';
 import { FindAllProductDTO } from './dto/find-all-product.dto';
+import { PublicAPI } from 'src/utils/decorators/authorize-roles.decorator';
 
 @Controller('product')
 @ApiTags('product')
@@ -38,6 +39,7 @@ export class ProductsController {
   constructor(private readonly productsService: ProductService) {}
 
   @Get('all')
+  @PublicAPI()
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
   @ApiQuery({ name: 'status', required: false, type: Number, example: -1 })
@@ -45,7 +47,8 @@ export class ProductsController {
     @Query() findAllProductDTO: FindAllProductDTO,
     @CurrentUser() currentUser: UserResponse,
   ): Promise<ApiResponse<PaginatedResponse<ProductResponse>>> {
-    const { page, limit, status , category_id , from_price, to_price , sort_by} = findAllProductDTO;
+    const { page, limit, status, category_id, from_price, to_price, sort_by } =
+      findAllProductDTO;
     try {
       return await this.productsService.findAllProduct(
         page,
@@ -63,6 +66,7 @@ export class ProductsController {
   }
 
   @Get('newest')
+  @PublicAPI()
   async getNewestProducts(
     @Query('count') count: number,
     @CurrentUser()
@@ -71,6 +75,7 @@ export class ProductsController {
     return await this.productsService.getNewestProducts(+count, currentUser);
   }
   @Get('popular')
+  @PublicAPI()
   async getTopRatingProducts(
     @Query('count') count: number,
     @CurrentUser()
@@ -80,6 +85,7 @@ export class ProductsController {
   }
 
   @Get('/:id')
+  @PublicAPI()
   @ApiParam({ name: 'id', required: true, type: Number })
   async findOneUser(
     @Param('id') id: number,

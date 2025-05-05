@@ -30,6 +30,7 @@ import { BannerEntity } from './entities/banner.entity';
 import { DeleteBannerDto } from './dto/delete-banner.dto';
 import { FindAllBannerDTO } from './dto/find-all-banner.dto';
 import { BannerResponse } from 'src/utils/response/banner.response';
+import { PublicAPI } from 'src/utils/decorators/authorize-roles.decorator';
 
 @Controller('banner')
 @ApiTags('banner')
@@ -38,7 +39,7 @@ import { BannerResponse } from 'src/utils/response/banner.response';
 @ApiBearerAuth('access-token')
 export class BannerController {
   constructor(private readonly bannerService: BannerService) {}
-
+  @PublicAPI()
   @Get('')
   @ApiQuery({ name: 'status', required: false, type: Number, example: -1 })
   async findAllBanner(
@@ -99,7 +100,7 @@ export class BannerController {
       throw new HttpException(error, HttpStatus.BAD_REQUEST);
     }
   }
- 
+
   @Post('change-status')
   @UseGuards(AuthorizeGuard(['admin']))
   async changeStatus(@Body('id') id: number, @Body('status') status: number) {

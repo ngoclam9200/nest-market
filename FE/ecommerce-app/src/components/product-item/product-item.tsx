@@ -102,7 +102,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
             <div style={{ marginTop: "" }}>
               <ManufacturerProduct></ManufacturerProduct>
               <PriceProduct product={product}></PriceProduct>
-              <ButtonAddCart product={product}></ButtonAddCart>
+              <ButtonAddCart product={product} quantity={1}></ButtonAddCart>
             </div>
           </div>
         </div>

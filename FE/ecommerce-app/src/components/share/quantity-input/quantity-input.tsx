@@ -6,11 +6,14 @@ interface CountProps {
   quantity: number;
   setQuantity: (count: number) => void;
   minQuantity?: number;
+  maxQuantity?: number;
 }
 
-const QuantityInput: React.FC<CountProps> = ({ quantity, setQuantity, minQuantity = 0 }) => {
+const QuantityInput: React.FC<CountProps> = ({ quantity, setQuantity, minQuantity = 0, maxQuantity = Number.MAX_SAFE_INTEGER }) => {
   const handleIncrement = () => {
-    setQuantity(quantity + 1);
+    if (quantity < maxQuantity) {
+      setQuantity(quantity + 1);
+    }
   };
 
   const handleDecrement = () => {
@@ -23,7 +26,7 @@ const QuantityInput: React.FC<CountProps> = ({ quantity, setQuantity, minQuantit
     const value = e.target.value;
     if (/^\d*$/.test(value)) {
       const newValue = value ? parseInt(value) : minQuantity;
-      setQuantity(Math.max(newValue, minQuantity));
+      setQuantity(Math.min(Math.max(newValue, minQuantity), maxQuantity));
     }
   };
 
@@ -33,7 +36,7 @@ const QuantityInput: React.FC<CountProps> = ({ quantity, setQuantity, minQuantit
         <a className="qty-up">
           <KeyboardArrowUpOutlinedIcon onClick={handleIncrement}></KeyboardArrowUpOutlinedIcon>
         </a>
-        <input type="text" name="quantity" onChange={handleInputChange} value={quantity} className="qty-val" min={minQuantity} />
+        <input type="text" name="quantity" onChange={handleInputChange} value={quantity} className="qty-val" min={minQuantity} max={maxQuantity} />
         <a className="qty-down">
           <KeyboardArrowDownOutlinedIcon onClick={handleDecrement}></KeyboardArrowDownOutlinedIcon>
         </a>

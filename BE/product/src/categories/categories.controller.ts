@@ -32,6 +32,7 @@ import {
   FindAllCategoryChildDTO,
   FindAllCategoryParentDTO,
 } from './dto/find-all-category.dto';
+import { PublicAPI } from 'src/utils/decorators/authorize-roles.decorator';
 
 @Controller('categories')
 @ApiTags('categories')
@@ -42,6 +43,8 @@ export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   @Get('child')
+  @PublicAPI()
+
   // @UseGuards(AuthorizeGuard(['admin']))
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
@@ -65,11 +68,13 @@ export class CategoriesController {
   }
 
   @Get('parent')
+  @PublicAPI()
   @ApiQuery({ name: 'status', required: false, type: Number, example: -1 })
   async findAllCategoryParent(
     @Query() findAllCategoryDTO: FindAllCategoryParentDTO,
     @CurrentUser() currentUser: UserResponse,
   ): Promise<ApiResponse<PaginatedResponse<CategoryResponse>>> {
+    console.log("🚀 ~ CategoriesController ~ currentUser:", currentUser)
     const { status } = findAllCategoryDTO;
     try {
       return await this.categoriesService.findAllCategoryParent(
@@ -82,6 +87,7 @@ export class CategoriesController {
   }
 
   @Get('all-child')
+  @PublicAPI()
   @ApiQuery({ name: 'status', required: false, type: Number, example: -1 })
   async findAllCategoryChild(
     @Query() findAllCategoryDTO: FindAllCategoryParentDTO,
@@ -100,6 +106,7 @@ export class CategoriesController {
   }
 
   @Get(':id')
+  @PublicAPI()
   @ApiParam({ name: 'id', required: true, type: Number })
   async findOneCategory(
     @Param('id') id: number,
@@ -113,6 +120,7 @@ export class CategoriesController {
   }
 
   @Get('with-code/:code')
+  @PublicAPI()
   async findCategoryWithCode(
     @Param('code') code: string,
     @CurrentUser() currentUser: UserResponse,

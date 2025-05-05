@@ -8,9 +8,9 @@ import { addToCart } from "../../../store/reducers/cart-reducer";
 interface PaddingProps {
   padding?: string;
   product: ProductResponse;
+  quantity?: number;
 }
-const ButtonAddCart: React.FC<PaddingProps> = ({ padding, product }) => {
-  const [quantity] = useState(1);
+const ButtonAddCart: React.FC<PaddingProps> = ({ padding, product, quantity = 1 }) => {
   const dispatch = useAppDispatch();
   const handleAddToCart = () => {
     if (product.stock <= 0) {

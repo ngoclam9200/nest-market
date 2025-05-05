@@ -16,7 +16,7 @@ export interface BannerResponse {
   status: number;
 }
 
-export function mapBannerResponse(banner: BannerEntity, media: MediaResponse , user_created?: UserResponse, user_updated?: UserResponse) {
+export function mapBannerResponse(banner: BannerEntity, media?: MediaResponse , user_created?: UserResponse, user_updated?: UserResponse) {
   const response = {
     id: banner.id,
     name: banner.name,

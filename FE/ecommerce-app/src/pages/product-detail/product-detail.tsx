@@ -106,7 +106,7 @@ const DetailProduct = () => {
                           </div>
                         </div>
                         <div className="short-desc mb-30">
-                          <p className="font-lg">{detailProduct.description}</p>
+                          <p className="font-lg">Số lượng: {detailProduct.stock}</p>
                         </div>
                         {detailProduct.unit && (
                           <div className="attr-detail attr-size mb-30">
@@ -115,12 +115,12 @@ const DetailProduct = () => {
                           </div>
                         )}
                         <div className="detail-extralink mb-20 flex-wrap">
-                          <QuantityInput quantity={quantity} setQuantity={setQuantity}></QuantityInput>
+                          <QuantityInput quantity={quantity} setQuantity={setQuantity} minQuantity={1} maxQuantity={detailProduct.stock}></QuantityInput>
                           <div className="product-extra-link2">
                             <ButtonAddCart
-                              padding={"11px 20px 11px 30px"}
-                              // product={detailProduct}
-                              // quantity={quantity}
+                              padding="11px 20px 11px 30px" 
+                              product={detailProduct}                              // product={detailProduct}
+                              quantity={quantity}
                             ></ButtonAddCart>
                           </div>
                           <div className="product-extra-link2">

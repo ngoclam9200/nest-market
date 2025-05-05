@@ -124,7 +124,7 @@ export class ProductService {
           const category = await this.categoryRepository.findOne({
             where: { id: product.category_id },
           });
-          if (currentUser.roles.includes(Roles.ADMIN)) {
+          if (currentUser && currentUser.roles.includes(Roles.ADMIN)) {
             let user_created_and_updated: ApiResponse<UserResponse[]> =
               await lastValueFrom(
                 this.userServiceGrpc.getUsersByIds({
@@ -188,7 +188,7 @@ export class ProductService {
       const category = await this.categoryRepository.findOne({
         where: { id: product.category_id },
       });
-      if (currentUser.roles.includes(Roles.ADMIN)) {
+      if (currentUser && currentUser.roles.includes(Roles.ADMIN)) {
         let user_created_and_updated: ApiResponse<UserResponse[]> =
           await lastValueFrom(
             this.userServiceGrpc.getUsersByIds({
@@ -414,7 +414,7 @@ export class ProductService {
             where: { id: product.category_id },
           });
 
-          if (currentUser?.roles?.includes(Roles.ADMIN)) {
+          if (currentUser && currentUser.roles.includes(Roles.ADMIN)) {
             let user_created_and_updated: ApiResponse<UserResponse[]> =
               await lastValueFrom(
                 this.userServiceGrpc.getUsersByIds({
@@ -475,7 +475,7 @@ export class ProductService {
             where: { id: product.category_id },
           });
 
-          if (currentUser?.roles?.includes(Roles.ADMIN)) {
+          if (currentUser && currentUser.roles.includes(Roles.ADMIN)) {
             let user_created_and_updated: ApiResponse<UserResponse[]> =
               await lastValueFrom(
                 this.userServiceGrpc.getUsersByIds({
