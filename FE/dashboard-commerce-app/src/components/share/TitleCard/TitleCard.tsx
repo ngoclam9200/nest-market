@@ -1,4 +1,3 @@
-import { max } from "moment";
 import React from "react";
 
 interface TitleCardProps {

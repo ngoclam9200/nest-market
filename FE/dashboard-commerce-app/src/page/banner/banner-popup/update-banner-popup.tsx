@@ -9,6 +9,7 @@ import { MediaResponse } from "../../../response/media";
 import { upload } from "../../../services/media/media-service";
 import { BannerService } from "../../../services/banner/banner-service";
 import { isSuccess } from "../../../services/base-response";
+import { domainMedia } from "../../../enums/Enum";
 
 interface UpdateBannerProps {
   open: boolean;
@@ -29,7 +30,6 @@ const UpdateBannerPopup: React.FC<UpdateBannerProps> = ({ open, setRefresh, setI
   const formikRef = useRef<any>(null);
   const [uploadedMedia, setUploadedMedia] = useState<MediaResponse[]>([]);
   const { fetch: updateBanner, response: resUpdate } = BannerService.updateBanner();
-  const domainMedia = import.meta.env.VITE_API_DOMAIN + import.meta.env.VITE_API_MEDIA_PORT + "/";
   // Initialize form values from banner data
   const getInitialValues = (): BannerFormValues => {
     if (!banner) {

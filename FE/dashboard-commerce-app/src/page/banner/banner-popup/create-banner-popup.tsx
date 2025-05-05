@@ -7,6 +7,7 @@ import Toast from "../../../components/share/Toast/Toast";
 import { MediaResponse } from "../../../response/media";
 import { upload } from "../../../services/media/media-service";
 import { BannerService } from "../../../services/banner/banner-service";
+import { domainMedia } from "../../../enums/Enum";
 
 interface CreateBannerProps {
   open: boolean;
@@ -24,7 +25,6 @@ interface BannerFormValues {
 const CreateBannerPopup: React.FC<CreateBannerProps> = ({ open, setRefresh, setIsOpenCreate }) => {
   const [error, setError] = useState<string>("");
   const formikRef = useRef<any>(null);
-  const domainMedia = import.meta.env.VITE_API_DOMAIN + import.meta.env.VITE_API_MEDIA_PORT + "/";
   const [uploadedMedia, setUploadedMedia] = useState<MediaResponse[]>([]);
   const { fetch: createBanner, response: resCreate } = BannerService.createBanner();
 

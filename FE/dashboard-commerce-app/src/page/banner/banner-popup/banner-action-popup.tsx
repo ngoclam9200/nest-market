@@ -4,79 +4,85 @@ import * as Yup from "yup";
 import { HttpStatusCode } from "axios";
 import Popup from "../../../components/share/Popup/Popup";
 import Toast from "../../../components/share/Toast/Toast";
-import { CategoryResponse } from "../../../response/category";
+import { BannerResponse } from "../../../response/banner";
 import { MediaResponse } from "../../../response/media";
 import { upload } from "../../../services/media/media-service";
-import { CategoryService } from "../../../services/category/category-service";
+import { BannerService } from "../../../services/banner/banner-service";
+import { isSuccess } from "../../../services/base-response";
+import { domainMedia, MODAL_TYPE } from "../../../enums/Enum";
 
-interface CreateCategoryProps {
+// Define modal types
+ 
+
+interface BannerActionProps {
   open: boolean;
-  setIsOpenCreate: (value: boolean) => void;
+  setIsOpen: (value: boolean) => void;
   setRefresh: (value: boolean) => void;
+  modalType: MODAL_TYPE;
+  banner?: BannerResponse | null;
 }
 
-interface CategoryFormValues {
+interface BannerFormValues {
   name: string;
   description: string;
-  parent_id: number;
+  title: string;
   media_id: number;
 }
 
-const CreateCategoryPopup: React.FC<CreateCategoryProps> = ({ open, setRefresh, setIsOpenCreate }) => {
+const BannerActionPopup: React.FC<BannerActionProps> = ({ open, setRefresh, setIsOpen, modalType, banner }) => {
   const [error, setError] = useState<string>("");
   const formikRef = useRef<any>(null);
-  const [listParentCategories, setListParentCategories] = useState<CategoryResponse[]>([]);
   const [uploadedMedia, setUploadedMedia] = useState<MediaResponse[]>([]);
-  const { fetch: createCategory, response: resCreate } = CategoryService.createCategory();
-  const { fetch: getCategoryParent, response: resCategoryparent } = CategoryService.getListParentCategory();
-  const initialValues: CategoryFormValues = {
-    name: "",
-    description: "",
-    parent_id: 0,
-    media_id: 0,
+  const { fetch: createBanner, response: resCreate } = BannerService.createBanner();
+  const { fetch: updateBanner, response: resUpdate } = BannerService.updateBanner();
+
+  // Initialize form values based on modal type and banner data
+  const getInitialValues = (): BannerFormValues => {
+    if (modalType === MODAL_TYPE.UPDATE && banner) {
+      return {
+        name: banner.name || "",
+        description: banner.description || "",
+        title: banner.title || "",
+        media_id: banner.media?.id || 0,
+      };
+    }
+    return {
+      name: "",
+      description: "",
+      title: "",
+      media_id: 0,
+    };
   };
 
   const validationSchema = Yup.object({
-    name: Yup.string().required("Vui lòng nhập tên danh mục"),
+    name: Yup.string().required("Vui lòng nhập tên banner"),
     media_id: Yup.number().min(1, "Vui lòng chọn hình ảnh").required("Vui lòng chọn hình ảnh"),
+    title: Yup.string().required("Vui lòng nhập tiêu đề"),
   });
 
   useEffect(() => {
+    // Reset uploaded media when modal opens
     if (open) {
-      getCategoryParent({ status: 1});
+      setUploadedMedia([]);
+      setError("");
     }
   }, [open]);
-  useEffect(() => {
-    if (resCategoryparent) {
-      if (resCategoryparent.status === HttpStatusCode.Ok) {
-        setListParentCategories(resCategoryparent.data);
-      } else {
-        Toast.ToastError(resCategoryparent.message);
-      }
-    }
-  }, [resCategoryparent]);
 
-  const handleSubmit = async (values: CategoryFormValues, {}: FormikHelpers<CategoryFormValues>) => {
-    createCategory({
-      name: values.name,
-      description: values.description,
-      parent_id: values.parent_id,
-      media_id: values.media_id,
-    });
-  };
   useEffect(() => {
-    if (resCreate) {
-      if (resCreate.status === HttpStatusCode.Ok) {
-        Toast.ToastSuccess("Tạo danh mục thành công");
+    const response = modalType === MODAL_TYPE.CREATE ? resCreate : resUpdate;
+
+    if (response) {
+      if ((modalType === MODAL_TYPE.CREATE && response.status === HttpStatusCode.Ok) || (modalType === MODAL_TYPE.UPDATE && isSuccess(response))) {
+        const actionText = modalType === MODAL_TYPE.CREATE ? "Tạo" : "Cập nhật";
+        Toast.ToastSuccess(`${actionText} banner thành công`);
         setRefresh(true);
-        setIsOpenCreate(false);
+        setIsOpen(false);
       } else {
-        Toast.ToastError(resCreate.message);
+        Toast.ToastError(response.message);
       }
     }
-  }, [resCreate]);
+  }, [resCreate, resUpdate]);
 
-  // Handle media upload
   // Handle media upload
   const handleUploadMedia = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
@@ -102,6 +108,29 @@ const CreateCategoryPopup: React.FC<CreateCategoryProps> = ({ open, setRefresh, 
     }
   };
 
+  const handleSubmit = async (values: BannerFormValues, {}: FormikHelpers<BannerFormValues>) => {
+    if (modalType === MODAL_TYPE.UPDATE && !banner) {
+      setError("Không tìm thấy thông tin banner");
+      return;
+    }
+
+    const bannerData = {
+      name: values.name,
+      description: values.description,
+      title: values.title,
+      media_id: values.media_id,
+    };
+
+    if (modalType === MODAL_TYPE.CREATE) {
+      createBanner(bannerData);
+    } else if (banner) {
+      updateBanner({
+        id: banner.id,
+        ...bannerData,
+      });
+    }
+  };
+
   // This function will be called when the Popup's submit button is clicked
   const handlePopupSubmit = () => {
     if (formikRef.current) {
@@ -109,27 +138,30 @@ const CreateCategoryPopup: React.FC<CreateCategoryProps> = ({ open, setRefresh, 
     }
   };
 
+  const popupTitle = modalType === MODAL_TYPE.CREATE ? "Tạo banner mới" : "Cập nhật banner";
+  const submitText = modalType === MODAL_TYPE.CREATE ? "Tạo mới" : "Cập nhật";
+
   return (
     <Popup
-      title="Tạo danh mục mới"
+      title={popupTitle}
       open={open}
       onClose={() => {
-        setIsOpenCreate(false);
+        setIsOpen(false);
       }}
       onSubmit={handlePopupSubmit}
-      submitText="Tạo mới"
+      submitText={submitText}
     >
       <div className="card-body">
-        <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit} innerRef={formikRef}>
+        <Formik initialValues={getInitialValues()} validationSchema={validationSchema} onSubmit={handleSubmit} innerRef={formikRef} enableReinitialize={true}>
           {({ handleChange }) => (
             <Form>
-              <label>Tên danh mục</label>
+              <label>Tên banner</label>
               <div className="mb-3">
                 <Field
                   type="text"
                   name="name"
                   className="form-control"
-                  placeholder="Tên danh mục"
+                  placeholder="Tên banner"
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     setError("");
                     handleChange(e);
@@ -138,24 +170,19 @@ const CreateCategoryPopup: React.FC<CreateCategoryProps> = ({ open, setRefresh, 
                 <ErrorMessage name="name" component="div" className="text-danger" />
               </div>
 
-              <label>Danh mục cha</label>
+              <label>Tiêu đề</label>
               <div className="mb-3">
                 <Field
-                  as="select"
-                  name="parent_id"
+                  type="text"
+                  name="title"
                   className="form-control"
-                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                  placeholder="Tiêu đề"
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     setError("");
                     handleChange(e);
                   }}
-                >
-                  <option value="0">Không có danh mục cha</option>
-                  {listParentCategories.map((parentCategory) => (
-                    <option key={parentCategory.id} value={parentCategory.id}>
-                      {parentCategory.name}
-                    </option>
-                  ))}
-                </Field>
+                />
+                <ErrorMessage name="title" component="div" className="text-danger" />
               </div>
 
               <label>Hình ảnh</label>
@@ -164,9 +191,17 @@ const CreateCategoryPopup: React.FC<CreateCategoryProps> = ({ open, setRefresh, 
                 <Field type="hidden" name="media_id" />
                 <ErrorMessage name="media_id" component="div" className="text-danger" />
 
+                {/* Show uploaded image if available */}
                 {uploadedMedia.length > 0 && (
                   <div className="mt-2">
-                    <img src={uploadedMedia[0].url} alt="Category preview" style={{ maxWidth: "100%", maxHeight: "200px" }} />
+                    <img src={domainMedia + uploadedMedia[0].url} alt="Banner preview" style={{ width: "100%", maxHeight: "200px" }} />
+                  </div>
+                )}
+
+                {/* Show existing image in update mode if no new image uploaded */}
+                {modalType === MODAL_TYPE.UPDATE && uploadedMedia.length === 0 && banner?.media && (
+                  <div className="mt-2">
+                    <img src={domainMedia + banner.media.url} alt="Banner preview" style={{ width: "100%", maxHeight: "200px" }} />
                   </div>
                 )}
               </div>
@@ -199,4 +234,4 @@ const CreateCategoryPopup: React.FC<CreateCategoryProps> = ({ open, setRefresh, 
   );
 };
 
-export default CreateCategoryPopup;
+export default BannerActionPopup;

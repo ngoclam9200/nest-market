@@ -2,7 +2,6 @@ import { useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import TitleCard from "../../components/share/TitleCard/TitleCard";
 import Loading from "../../components/share/Loading/Loading";
-import { formatDate } from "../../utils/FormatDateTime";
 import Badge from "../../components/share/Badge/Badge";
 import { Pagination, Stack } from "@mui/material";
 import NotFound from "../../components/share/NotFound/NotFound";
@@ -11,8 +10,7 @@ import { isSuccess } from "../../services/base-response";
 import EditButton from "../../components/share/ButtonActionTable/EditButtion";
 import Image from "../../components/share/Image/Image";
 
-import CreateProductPopup from "./product-popup/create-product-popup";
-import UpdateProductPopup from "./product-popup/update-product-popup";
+ 
 import ChangeStatusProductPopup from "./product-popup/change-status-product-popup";
 import { ProductResponse } from "../../response/product";
 import ChangeStatusButton from "../../components/share/ButtonActionTable/ChangeStatusButton";
@@ -20,15 +18,18 @@ import CloseIcon from "@mui/icons-material/Close";
 import CheckIcon from "@mui/icons-material/Check";
 import { ProductService } from "../../services/product/product-service";
 import Toast from "../../components/share/Toast/Toast";
+import { domainMedia, MODAL_TYPE } from "../../enums/Enum";
+import ProductActionPopup from "./product-popup/product-action-popup";
+import { formatDate } from "../../utils/helpers";
 
 const ProductList = () => {
-  const domainMedia = import.meta.env.VITE_API_DOMAIN + import.meta.env.VITE_API_MEDIA_PORT + "/";
 
-  const [isCreatePopupOpen, setIsCreatePopupOpen] = useState(false);
+ 
   const [refresh, setRefresh] = useState(false);
-  const [isUpdatePopupOpen, setIsUpdatePopupOpen] = useState(false);
+  const [isOpenProductModal, setIsOpenProductModal] = useState<boolean>(false);
+  const [modalType, setModalType] = useState<MODAL_TYPE>(MODAL_TYPE.CREATE);
+  const [selectedProduct, setSelectedProduct] = useState<ProductResponse>(new ProductResponse());
   const [isChangeStatusPopupOpen, setIsChangeStatusPopupOpen] = useState(false);
-  const [dataObjectProduct, setDataObjectProduct] = useState<ProductResponse>(new ProductResponse());
   const [products, setProducts] = useState<ProductResponse[]>([]);
   const [totalRecord, setTotalRecord] = useState(0);
 
@@ -68,7 +69,10 @@ const ProductList = () => {
   return (
     <>
       <div className="container-fluid">
-        <ButtonAddNew createPopup={() => setIsCreatePopupOpen(true)} title="Thêm sản phẩm" />
+        <ButtonAddNew createPopup={() => {
+            setModalType(MODAL_TYPE.CREATE);
+            setIsOpenProductModal(true);
+        }} title="Thêm sản phẩm" />
         <div className="row">
           <div className="col-12">
             <div className="card mb-4">
@@ -118,8 +122,9 @@ const ProductList = () => {
                             <td className="align-middle">
                               <EditButton
                                 functionProps={() => {
-                                  setDataObjectProduct(product);
-                                  setIsUpdatePopupOpen(true);
+                                   setModalType(MODAL_TYPE.UPDATE);
+                                   setSelectedProduct(product);
+                                   setIsOpenProductModal(true);
                                 }}
                               ></EditButton>
 
@@ -127,14 +132,14 @@ const ProductList = () => {
                                 <ChangeStatusButton
                                   functionProps={() => {
                                     setIsChangeStatusPopupOpen(true);
-                                    setDataObjectProduct(product);
+                                    setSelectedProduct(product);
                                   }}
                                   icon={<CloseIcon style={{ color: "red" }} />}
                                 />
                               ) : (
                                 <ChangeStatusButton
                                   functionProps={() => {
-                                    setDataObjectProduct(product);
+                                    setSelectedProduct(product);
                                     setIsChangeStatusPopupOpen(true);
                                   }}
                                   icon={<CheckIcon style={{ color: "green" }} />}
@@ -159,12 +164,9 @@ const ProductList = () => {
         </div>
       </div>
 
-      {isCreatePopupOpen && <CreateProductPopup setRefresh={setRefresh} open={isCreatePopupOpen} setIsOpenCreate={setIsCreatePopupOpen} />}
-
-      {isUpdatePopupOpen && <UpdateProductPopup setIsOpenUpdate={setIsUpdatePopupOpen} productId={dataObjectProduct.id} open={isUpdatePopupOpen} setRefresh={setRefresh} />}
-
+      <ProductActionPopup open={isOpenProductModal} setIsOpen={setIsOpenProductModal} setRefresh={setRefresh} modalType={modalType} product={selectedProduct} />
       {isChangeStatusPopupOpen && (
-        <ChangeStatusProductPopup open={isChangeStatusPopupOpen} setIsOpenChangeStatus={setIsChangeStatusPopupOpen} product={dataObjectProduct} setRefresh={setRefresh} />
+        <ChangeStatusProductPopup open={isChangeStatusPopupOpen} setIsOpenChangeStatus={setIsChangeStatusPopupOpen} product={selectedProduct} setRefresh={setRefresh} />
       )}
     </>
   );

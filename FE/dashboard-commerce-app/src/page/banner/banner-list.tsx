@@ -1,29 +1,28 @@
 import { useEffect, useState } from "react";
-import CreateBannerPopup from "./banner-popup/create-banner-popup";
 import { BannerResponse } from "../../response/banner";
 import NotFound from "../../components/share/NotFound/NotFound";
 import ButtonAddNew from "../../components/share/ButtonAddNew/ButtonAddNew";
 import Badge from "../../components/share/Badge/Badge";
-import { formatDate } from "../../utils/FormatDateTime";
 import Loading from "../../components/share/Loading/Loading";
 import EditButton from "../../components/share/ButtonActionTable/EditButtion";
 import Image from "../../components/share/Image/Image";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckIcon from "@mui/icons-material/Check";
-import UpdateBannerPopup from "./banner-popup/update-banner-popup";
 import ChangeStatusBannerPopup from "./banner-popup/change-status-banner-popup";
 import ChangeStatusButton from "../../components/share/ButtonActionTable/ChangeStatusButton";
 import { BannerService } from "../../services/banner/banner-service";
 import { isSuccess } from "../../services/base-response";
+import { domainMedia, MODAL_TYPE } from "../../enums/Enum";
+import { formatDate } from "../../utils/helpers";
+import BannerActionPopup from "./banner-popup/banner-action-popup";
 
 const BannerList = () => {
-  const domainMedia = import.meta.env.VITE_API_DOMAIN + import.meta.env.VITE_API_MEDIA_PORT + "/";
-  const [isCreatePopupOpen, setIsCreatePopupOpen] = useState(false);
-  const [isUpdatePopupOpen, setIsUpdatePopupOpen] = useState(false);
+  const [isOpenBannerModal, setIsOpenBannerModal] = useState<boolean>(false);
+  const [modalType, setModalType] = useState<MODAL_TYPE>(MODAL_TYPE.CREATE);
+  const [selectedBanner, setSelectedBanner] = useState<BannerResponse>(new BannerResponse());
   const [isChangeStatusPopupOpen, setIsChangeStatusPopupOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [listBanner, setListBanner] = useState<BannerResponse[]>([]);
-  const [dataObjectBanner, setDataObjectBanner] = useState<BannerResponse>(new BannerResponse());
   const [refresh, setRefresh] = useState(false);
 
   const { fetch: getListBanner, response: resListBannerResponse } = BannerService.getAllBanner();
@@ -50,7 +49,13 @@ const BannerList = () => {
   return (
     <>
       <div className="container-fluid">
-        <ButtonAddNew createPopup={() => setIsCreatePopupOpen(true)} title="Thêm banner" />
+        <ButtonAddNew
+          createPopup={() => {
+            setModalType(MODAL_TYPE.CREATE);
+            setIsOpenBannerModal(true);
+          }}
+          title="Thêm banner"
+        />
         <div className="row">
           <div className="col-12">
             <div className="card mb-4">
@@ -103,15 +108,16 @@ const BannerList = () => {
                             <td className="align-middle ">
                               <EditButton
                                 functionProps={() => {
-                                  setDataObjectBanner(banner);
-                                  setIsUpdatePopupOpen(true);
+                                  setModalType(MODAL_TYPE.UPDATE);
+                                  setSelectedBanner(banner);
+                                  setIsOpenBannerModal(true);
                                 }}
                               ></EditButton>
 
                               {banner.status == 1 ? (
                                 <ChangeStatusButton
                                   functionProps={() => {
-                                    setDataObjectBanner(banner);
+                                    setSelectedBanner(banner);
                                     setIsChangeStatusPopupOpen(true);
                                   }}
                                   icon={<CloseIcon style={{ color: "red" }} />}
@@ -119,7 +125,7 @@ const BannerList = () => {
                               ) : (
                                 <ChangeStatusButton
                                   functionProps={() => {
-                                    setDataObjectBanner(banner);
+                                    setSelectedBanner(banner);
                                     setIsChangeStatusPopupOpen(true);
                                   }}
                                   icon={<CheckIcon style={{ color: "green" }} />}
@@ -141,13 +147,9 @@ const BannerList = () => {
         </div>
       </div>
 
-      {isCreatePopupOpen && <CreateBannerPopup setRefresh={setRefresh} open={isCreatePopupOpen} setIsOpenCreate={setIsCreatePopupOpen} />}
+      <BannerActionPopup open={isOpenBannerModal} setIsOpen={setIsOpenBannerModal} setRefresh={setRefresh} modalType={modalType} banner={selectedBanner} />
 
-      {isUpdatePopupOpen && <UpdateBannerPopup banner={dataObjectBanner} open={isUpdatePopupOpen} setIsOpenUpdate={setIsUpdatePopupOpen} setRefresh={setRefresh} />}
-
-      {isChangeStatusPopupOpen && (
-        <ChangeStatusBannerPopup banner={dataObjectBanner} open={isChangeStatusPopupOpen} setIsOpen={setIsChangeStatusPopupOpen} setRefresh={setRefresh} />
-      )}
+      {isChangeStatusPopupOpen && <ChangeStatusBannerPopup banner={selectedBanner} open={isChangeStatusPopupOpen} setIsOpen={setIsChangeStatusPopupOpen} setRefresh={setRefresh} />}
     </>
   );
 };

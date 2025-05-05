@@ -122,6 +122,27 @@ header {
   transition: all 0.3s ease 0s;
   background: #fff;
 }
+
+.hotline {
+  svg {
+    font-size: 40px;
+  }
+  p {
+    .phone-number {
+      color: #3bb77e !important;
+      font-size: 26px;
+      font-weight: 700;
+    }
+    .text-support {
+      font-weight: 500;
+      font-size: 12px;
+      font-family: "Lato", sans-serif;
+      color: #7e7e7e;
+      letter-spacing: 0.9px;
+      display: block;
+    }
+  }
+}
 @media only screen and (min-width: 1200px) {
   .header-action-right {
     display: flex !important;

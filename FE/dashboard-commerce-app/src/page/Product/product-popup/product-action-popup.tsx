@@ -8,18 +8,22 @@ import Popup from "../../../components/share/Popup/Popup";
 import Toast from "../../../components/share/Toast/Toast";
 import { upload } from "../../../services/media/media-service";
 import { ProductService } from "../../../services/product/product-service";
-import { removeNonNumeric, formatCurrency } from "../../../utils/FormatCurrency";
 import { CategoryResponse } from "../../../response/category";
 import { MediaResponse } from "../../../response/media";
 import { ProductResponse } from "../../../response/product";
 import { CategoryService } from "../../../services/category/category-service";
 import { isSuccess } from "../../../services/base-response";
+import { domainMedia, MODAL_TYPE } from "../../../enums/Enum";
+import { formatCurrencyDecimal } from "../../../utils/helpers";
 
-interface UpdateProductProps {
+// Define modal types
+
+interface ProductActionProps {
   open: boolean;
-  setIsOpenUpdate: (value: boolean) => void;
+  setIsOpen: (value: boolean) => void;
   setRefresh: (value: boolean) => void;
-  productId: number;
+  modalType: MODAL_TYPE;
+  product?: ProductResponse;
 }
 
 interface ProductFormValues {
@@ -37,33 +41,33 @@ interface ProductFormValues {
   storage_instructions: string;
 }
 
-const UpdateProductPopup: React.FC<UpdateProductProps> = ({ open, setRefresh, setIsOpenUpdate, productId }) => {
+const ProductActionPopup: React.FC<ProductActionProps> = ({ open, setRefresh, setIsOpen, modalType, product }) => {
   const [image, setImage] = useState<File[] | null>(null);
   const [existingImages, setExistingImages] = useState<MediaResponse[]>([]);
   const [listCategory, setListCategory] = useState<CategoryResponse[]>([]);
   const [error, setError] = useState<string>("");
-
   const [productData, setProductData] = useState<ProductResponse>(new ProductResponse());
   const formikRef = useRef<any>(null);
-  const domainMedia = import.meta.env.VITE_API_DOMAIN + import.meta.env.VITE_API_MEDIA_PORT + "/";
 
-  const { fetch: getAllChildCategory, response: listCategoryResponse } = CategoryService.getAllChildCategory();
+  const { fetch: getAllChildCategory, response: resCategory } = CategoryService.getAllChildCategory();
   const { fetch: getDetailProduct, response: resDetail, loading: loading } = ProductService.getDetailProduct();
+  const { fetch: createProduct, response: resCreate } = ProductService.createProduct();
   const { fetch: updateProduct, response: resUpdate } = ProductService.updateProduct();
 
+  // Set initial values based on modal type
   const initialValues: ProductFormValues = {
-    id: productData?.id || 0,
-    name: productData?.name || "",
-    price: productData?.price ? formatCurrency(productData.price) : "0",
-    discount: productData?.discount || 0,
-    unit: productData?.unit || "",
-    categoryId: productData?.category.id || -1,
-    description: productData?.description || "",
-    quantity: productData?.quantity || 0,
-    brand: productData?.brand || "",
-    origin: productData?.origin || "",
-    expiry_date: productData?.expiry_date || "",
-    storage_instructions: productData?.storage_instructions || "",
+    id: modalType === MODAL_TYPE.UPDATE && productData ? productData.id || 0 : 0,
+    name: modalType === MODAL_TYPE.UPDATE && productData ? productData.name || "" : "",
+    price: modalType === MODAL_TYPE.UPDATE && productData ? (productData.price ? formatCurrencyDecimal(productData.price) : "0") : "100",
+    discount: modalType === MODAL_TYPE.UPDATE && productData ? productData.discount || 0 : 0,
+    unit: modalType === MODAL_TYPE.UPDATE && productData ? productData.unit || "" : "",
+    categoryId: modalType === MODAL_TYPE.UPDATE && productData ? (productData.category ? productData.category.id || -1 : -1) : -1,
+    description: modalType === MODAL_TYPE.UPDATE && productData ? productData.description || "" : "",
+    quantity: modalType === MODAL_TYPE.UPDATE && productData ? productData.quantity || 0 : 0,
+    brand: modalType === MODAL_TYPE.UPDATE && productData ? productData.brand || "" : "",
+    origin: modalType === MODAL_TYPE.UPDATE && productData ? productData.origin || "" : "",
+    expiry_date: modalType === MODAL_TYPE.UPDATE && productData ? productData.expiry_date || "" : "",
+    storage_instructions: modalType === MODAL_TYPE.UPDATE && productData ? productData.storage_instructions || "" : "",
   };
 
   const validationSchema = Yup.object({
@@ -75,26 +79,35 @@ const UpdateProductPopup: React.FC<UpdateProductProps> = ({ open, setRefresh, se
   });
 
   useEffect(() => {
-    if (open && productId) {
-      getDetailProduct(productId);
+    if (open) {
       getAllChildCategory();
-    }
-  }, [open, productId]);
 
-  useEffect(() => {
-    if (listCategoryResponse) {
-      if (isSuccess(listCategoryResponse)) {
-        setListCategory(listCategoryResponse.data);
+      // If updating, fetch product details
+      if (modalType === MODAL_TYPE.UPDATE && product) {
+        getDetailProduct(product.id);
       } else {
-        Toast.ToastError(listCategoryResponse.message);
+        // Reset form for create mode
+        setProductData(new ProductResponse());
+        setExistingImages([]);
+        setImage(null);
       }
     }
-  }, [listCategoryResponse]);
+  }, [open, modalType, product]);
+
   useEffect(() => {
-    if (resDetail) {
+    if (resCategory) {
+      if (isSuccess(resCategory)) {
+        setListCategory(resCategory.data);
+      } else {
+        Toast.ToastError(resCategory.message);
+      }
+    }
+  }, [resCategory]);
+
+  useEffect(() => {
+    if (resDetail && modalType === MODAL_TYPE.UPDATE) {
       if (isSuccess(resDetail)) {
         setProductData(resDetail.data);
-
         // Set existing images if available
         if (resDetail.data.media && resDetail.data.media.length > 0) {
           setExistingImages(resDetail.data.media);
@@ -103,23 +116,25 @@ const UpdateProductPopup: React.FC<UpdateProductProps> = ({ open, setRefresh, se
         Toast.ToastError(resDetail.message);
       }
     }
-  }, [resDetail]);
+  }, [resDetail, modalType]);
 
   useEffect(() => {
-    if (resUpdate) {
-      if (isSuccess(resUpdate)) {
-        Toast.ToastSuccess("Cập nhật sản phẩm thành công");
-        setRefresh(true);
+    const response = modalType === MODAL_TYPE.CREATE ? resCreate : resUpdate;
 
+    if (response) {
+      if (isSuccess(response)) {
+        const actionText = modalType === MODAL_TYPE.CREATE ? "Thêm" : "Cập nhật";
+        Toast.ToastSuccess(`${actionText} sản phẩm thành công`);
+        setRefresh(true);
         setImage(null);
         setExistingImages([]);
         setError("");
-        setIsOpenUpdate(false);
+        setIsOpen(false);
       } else {
-        Toast.ToastError(resUpdate.message);
+        Toast.ToastError(response.message);
       }
     }
-  }, [resUpdate]);
+  }, [resCreate, resUpdate, modalType]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -142,12 +157,19 @@ const UpdateProductPopup: React.FC<UpdateProductProps> = ({ open, setRefresh, se
   };
 
   const handleSubmit = async (values: ProductFormValues, {}: FormikHelpers<ProductFormValues>) => {
-    if (!existingImages.length && (!image || image.length === 0)) {
+    // Validate images
+    if (modalType === MODAL_TYPE.CREATE && (!image || image.length === 0)) {
+      setError("Vui lòng chọn hình ảnh");
+      return;
+    }
+
+    if (modalType === MODAL_TYPE.UPDATE && !existingImages.length && (!image || image.length === 0)) {
       setError("Vui lòng chọn hình ảnh");
       return;
     }
 
     let list_media_id = existingImages.map((media) => media.id);
+    let default_media_id = existingImages.length > 0 ? existingImages[0].id : 0;
 
     // Upload new images if any
     if (image && image.length > 0) {
@@ -155,28 +177,45 @@ const UpdateProductPopup: React.FC<UpdateProductProps> = ({ open, setRefresh, se
       if (responseMedia.status === HttpStatusCode.Ok) {
         const new_media_ids = responseMedia.data.map((md: MediaResponse) => md.id);
         list_media_id = [...list_media_id, ...new_media_ids];
+
+        // Set default media id if not already set
+        if (default_media_id === 0 && new_media_ids.length > 0) {
+          default_media_id = new_media_ids[0];
+        }
       } else {
         setError(responseMedia.message);
         return;
       }
     }
 
-    const price_product = Number(removeNonNumeric(values.price));
-    updateProduct({
-      id: values.id,
+    const price_product = Number(values.price.replace(/,/g, ""));
+
+    const productData = {
       name: values.name,
       description: values.description,
       category_id: values.categoryId,
+      price: price_product,
+      list_media_id: list_media_id,
       discount: values.discount,
       unit: values.unit,
-      price: price_product,
       quantity: values.quantity,
-      list_media_id: list_media_id,
       brand: values.brand,
       origin: values.origin,
       expiry_date: values.expiry_date,
       storage_instructions: values.storage_instructions,
-    });
+    };
+
+    if (modalType === MODAL_TYPE.CREATE) {
+      createProduct({
+        ...productData,
+        default_media_id: default_media_id,
+      });
+    } else {
+      updateProduct({
+        id: values.id,
+        ...productData,
+      });
+    }
   };
 
   // This function will be called when the Popup's submit button is clicked
@@ -186,19 +225,22 @@ const UpdateProductPopup: React.FC<UpdateProductProps> = ({ open, setRefresh, se
     }
   };
 
+  const popupTitle = modalType === MODAL_TYPE.CREATE ? "Thêm sản phẩm" : "Cập nhật sản phẩm";
+  const submitText = modalType === MODAL_TYPE.CREATE ? "Thêm mới" : "Cập nhật";
+
   return (
     <Popup
-      title="Cập nhật sản phẩm"
+      title={popupTitle}
       open={open}
       onClose={() => {
-        setIsOpenUpdate(false);
+        setIsOpen(false);
       }}
       onSubmit={handlePopupSubmit}
-      submitText="Cập nhật"
+      submitText={submitText}
       maxWidth="md"
     >
       <div className="card-body">
-        {loading ? (
+        {modalType === MODAL_TYPE.UPDATE && loading ? (
           <div className="text-center">
             <p>Đang tải thông tin sản phẩm...</p>
           </div>
@@ -207,6 +249,7 @@ const UpdateProductPopup: React.FC<UpdateProductProps> = ({ open, setRefresh, se
             {({ values, handleChange, setFieldValue }) => (
               <Form>
                 <Grid container spacing={2}>
+                  {/* Left Column */}
                   <Grid item xs={12} md={6}>
                     <label>Tên sản phẩm</label>
                     <div className="mb-3">
@@ -222,7 +265,6 @@ const UpdateProductPopup: React.FC<UpdateProductProps> = ({ open, setRefresh, se
                       />
                       <ErrorMessage name="name" component="div" className="text-danger" />
                     </div>
-
                     <label>Giá</label>
                     <div className="mb-3">
                       <Field
@@ -232,14 +274,15 @@ const UpdateProductPopup: React.FC<UpdateProductProps> = ({ open, setRefresh, se
                         placeholder="Giá"
                         value={values.price}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                          const numericValue = removeNonNumeric(e.target.value);
-                          setFieldValue("price", formatCurrency(Number(numericValue)));
+                          const value = e.target.value.replace(/,/g, "");
+                          if (/^\d*$/.test(value)) {
+                            setFieldValue("price", formatCurrencyDecimal(Number(value)));
+                          }
                           setError("");
                         }}
                       />
                       <ErrorMessage name="price" component="div" className="text-danger" />
                     </div>
-
                     <label>Giảm giá (%)</label>
                     <div className="mb-3">
                       <Field
@@ -266,7 +309,6 @@ const UpdateProductPopup: React.FC<UpdateProductProps> = ({ open, setRefresh, se
                         name="brand"
                         className="form-control"
                         placeholder="Thương hiệu"
-                        values={values.brand}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                           setError("");
                           handleChange(e);
@@ -281,7 +323,6 @@ const UpdateProductPopup: React.FC<UpdateProductProps> = ({ open, setRefresh, se
                         name="origin"
                         className="form-control"
                         placeholder="Nơi sản xuất"
-                        values={values.origin}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                           setError("");
                           handleChange(e);
@@ -290,7 +331,7 @@ const UpdateProductPopup: React.FC<UpdateProductProps> = ({ open, setRefresh, se
                       <ErrorMessage name="origin" component="div" className="text-danger" />
                     </div>
                   </Grid>
-
+                  {/* Right Column */}
                   <Grid item xs={12} md={6}>
                     <label>Đơn vị tính</label>
                     <div className="mb-3">
@@ -306,7 +347,6 @@ const UpdateProductPopup: React.FC<UpdateProductProps> = ({ open, setRefresh, se
                       />
                       <ErrorMessage name="unit" component="div" className="text-danger" />
                     </div>
-
                     <label>Thuộc danh mục</label>
                     <div className="mb-3">
                       <Field
@@ -333,7 +373,6 @@ const UpdateProductPopup: React.FC<UpdateProductProps> = ({ open, setRefresh, se
                       </Field>
                       <ErrorMessage name="categoryId" component="div" className="text-danger" />
                     </div>
-
                     <label>Số lượng</label>
                     <div className="mb-3">
                       <Field
@@ -343,14 +382,16 @@ const UpdateProductPopup: React.FC<UpdateProductProps> = ({ open, setRefresh, se
                         placeholder="Số lượng"
                         value={values.quantity}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                          const numericValue = removeNonNumeric(e.target.value);
-                          setFieldValue("quantity", formatCurrency(Number(numericValue)));
+                          const value = e.target.value.replace(/,/g, "");
+                          if (/^\d*$/.test(value)) {
+                            setFieldValue("quantity", Number(value));
+                          }
+
                           setError("");
                         }}
                       />
                       <ErrorMessage name="quantity" component="div" className="text-danger" />
                     </div>
-
                     <label>Hạn sử dụng</label>
                     <div className="mb-3">
                       <Field
@@ -358,7 +399,6 @@ const UpdateProductPopup: React.FC<UpdateProductProps> = ({ open, setRefresh, se
                         name="expiry_date"
                         className="form-control"
                         placeholder="Hạn sử dụng"
-                        value={values.expiry_date}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                           setError("");
                           handleChange(e);
@@ -373,7 +413,6 @@ const UpdateProductPopup: React.FC<UpdateProductProps> = ({ open, setRefresh, se
                         name="storage_instructions"
                         className="form-control"
                         placeholder="Bảo quản"
-                        value={values.storage_instructions}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                           setError("");
                           handleChange(e);
@@ -398,12 +437,10 @@ const UpdateProductPopup: React.FC<UpdateProductProps> = ({ open, setRefresh, se
                       />
                     </div>
                   </Grid>
-
+                  {/* Full width for image section */}
                   <Grid item xs={12}>
-                    {/* <h6>Hình ảnh sản phẩm</h6> */}
-
-                    {/* Existing images */}
-                    {existingImages && existingImages.length > 0 && (
+                    {/* Existing images - only show in update mode */}
+                    {modalType === MODAL_TYPE.UPDATE && existingImages && existingImages.length > 0 && (
                       <Box className="d-flex align-items-center mb-3">
                         <div>
                           <label>Hình ảnh hiện tại</label>
@@ -426,7 +463,7 @@ const UpdateProductPopup: React.FC<UpdateProductProps> = ({ open, setRefresh, se
                     {image && image.length > 0 && (
                       <Box className="d-flex align-items-center mb-3">
                         <div>
-                          <h6>Hình ảnh mới</h6>
+                          <label>{modalType === MODAL_TYPE.UPDATE ? "Hình ảnh mới" : "Hình ảnh sản phẩm"}</label>
                           <ul className="list-img">
                             {image.map((img, index) => (
                               <li key={index} className="item flex-column">
@@ -463,4 +500,4 @@ const UpdateProductPopup: React.FC<UpdateProductProps> = ({ open, setRefresh, se
   );
 };
 
-export default UpdateProductPopup;
+export default ProductActionPopup;

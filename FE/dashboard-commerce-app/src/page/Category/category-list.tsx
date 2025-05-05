@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react";
-import CreateCategoryPopup from "./category-popup/create-category-popup";
 import { CategoryResponse } from "../../response/category";
 import NotFound from "../../components/share/NotFound/NotFound";
 import ButtonAddNew from "../../components/share/ButtonAddNew/ButtonAddNew";
 import TitleCard from "../../components/share/TitleCard/TitleCard";
 import Badge from "../../components/share/Badge/Badge";
-import { formatDate } from "../../utils/FormatDateTime";
 import Loading from "../../components/share/Loading/Loading";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import EditButton from "../../components/share/ButtonActionTable/EditButtion";
@@ -14,19 +12,20 @@ import Image from "../../components/share/Image/Image";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckIcon from "@mui/icons-material/Check";
 import { Pagination, Stack } from "@mui/material";
-import UpdateCategoryPopup from "./category-popup/update-category-popup";
 import ChangeStatusCategoryPopup from "./category-popup/change-status-category-popup";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ChangeStatusButton from "../../components/share/ButtonActionTable/ChangeStatusButton";
 
-import { getCookie } from "../../services/cookie";
 import { CategoryService } from "../../services/category/category-service";
 import { isSuccess } from "../../services/base-response";
+import CategoryActionPopup from "./category-popup/category-popup-action";
+import { domainMedia, MODAL_TYPE } from "../../enums/Enum";
+import { formatDate } from "../../utils/helpers";
 
 const CategoryList = () => {
-  const domainMedia = import.meta.env.VITE_API_DOMAIN + import.meta.env.VITE_API_MEDIA_PORT + "/";
-  const [isCreatePopupOpen, setIsCreatePopupOpen] = useState(false);
-  const [isUpdatePopupOpen, setIsUpdatePopupOpen] = useState(false);
+  const [isOpenPopup, setIsOpenPopup] = useState(false);
+  const [modalType, setModalType] = useState<MODAL_TYPE>(MODAL_TYPE.CREATE);
+  const [selectedCategory, setSelectedCategory] = useState<CategoryResponse>(new CategoryResponse());
   const [isChangeStatusPopupOpen, setIsChangeStatusPopupOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [currentParentCategory, setCurrentParentCategory] = useState<CategoryResponse | null>(null);
@@ -35,7 +34,7 @@ const CategoryList = () => {
   const [totalRecordListChildCategories, setTotalRecordListChildCategories] = useState(0);
   const [showListCategory, setShowListCategory] = useState<CategoryResponse[]>([]);
 
-  const [dataObjectCategory, setDataObjectCategory] = useState<CategoryResponse>(new CategoryResponse());
+  // const [dataObjectCategory, setDataObjectCategory] = useState<CategoryResponse>(new CategoryResponse());
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -85,8 +84,8 @@ const CategoryList = () => {
     }
 
     setCurrentParentCategory(null);
-    
-    getListParentCategory({ status: -1});
+
+    getListParentCategory({ status: -1 });
     setRefresh(false);
   }, [location, parentNameCategory]);
 
@@ -121,7 +120,6 @@ const CategoryList = () => {
       } else {
         setCurrentParentCategory(null);
 
-        
         getListParentCategory({ status: -1 });
       }
       setRefresh(false);
@@ -144,7 +142,14 @@ const CategoryList = () => {
   return (
     <>
       <div className="container-fluid">
-        <ButtonAddNew createPopup={() => setIsCreatePopupOpen(true)} title="Thêm danh mục" />
+        <ButtonAddNew
+          createPopup={() => {
+            setModalType(MODAL_TYPE.CREATE);
+            // setSelectedCategory(undefined);
+            setIsOpenPopup(true);
+          }}
+          title="Thêm danh mục"
+        />
         <div className="row">
           <div className="col-12">
             <div className="card mb-4">
@@ -201,15 +206,16 @@ const CategoryList = () => {
                             <td className="align-middle ">
                               <EditButton
                                 functionProps={() => {
-                                  setDataObjectCategory(category);
-                                  setIsUpdatePopupOpen(true);
+                                  setModalType(MODAL_TYPE.UPDATE);
+                                  setSelectedCategory(category);
+                                  setIsOpenPopup(true);
                                 }}
                               ></EditButton>
                               {!currentParentCategory && <NavigationButton functionProps={() => handleClickGoCategoryChild(category)}></NavigationButton>}
                               {category.status == 1 ? (
                                 <ChangeStatusButton
                                   functionProps={() => {
-                                    setDataObjectCategory(category);
+                                    setSelectedCategory(category);
                                     setIsChangeStatusPopupOpen(true);
                                   }}
                                   icon={<CloseIcon style={{ color: "red" }} />}
@@ -217,7 +223,7 @@ const CategoryList = () => {
                               ) : (
                                 <ChangeStatusButton
                                   functionProps={() => {
-                                    setDataObjectCategory(category);
+                                    setSelectedCategory(category);
                                     setIsChangeStatusPopupOpen(true);
                                   }}
                                   icon={<CheckIcon style={{ color: "green" }} />}
@@ -250,12 +256,9 @@ const CategoryList = () => {
         </div>
       </div>
 
-      {isCreatePopupOpen && <CreateCategoryPopup setRefresh={setRefresh} open={isCreatePopupOpen} setIsOpenCreate={setIsCreatePopupOpen} />}
-
-      {isUpdatePopupOpen && <UpdateCategoryPopup category={dataObjectCategory} open={isUpdatePopupOpen} setIsOpenUpdate={setIsUpdatePopupOpen} setRefresh={setRefresh} />}
-
+      <CategoryActionPopup open={isOpenPopup} setIsOpen={setIsOpenPopup} setRefresh={setRefresh} modalType={modalType} selectedCategory={selectedCategory} />
       {isChangeStatusPopupOpen && (
-        <ChangeStatusCategoryPopup category={dataObjectCategory} open={isChangeStatusPopupOpen} setIsOpen={setIsChangeStatusPopupOpen} setRefresh={setRefresh} />
+        <ChangeStatusCategoryPopup category={selectedCategory} open={isChangeStatusPopupOpen} setIsOpen={setIsChangeStatusPopupOpen} setRefresh={setRefresh} />
       )}
     </>
   );

@@ -8,6 +8,7 @@ import { CartItem, updateQuantity } from "../../store/reducers/cart-reducer";
 import { removeFromCart } from "../../store/reducers/cart-reducer"; // Assuming these actions exist
 import { Link } from "react-router-dom";
 import { formatCurrencyDecimal } from "../../utils/helpers";
+import { domainMedia } from "../../enums/Enum";
 
 const Cart = () => {
   const { itemsCart, totalPriceCart } = useAppSelector((state) => state.cart);
@@ -15,7 +16,6 @@ const Cart = () => {
   const dispatch = useAppDispatch();
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
   const [selectAll, setSelectAll] = useState(false);
-  const domainMedia = import.meta.env.VITE_API_DOMAIN + import.meta.env.VITE_API_MEDIA_PORT + "/";
 
   // Handle quantity change
   const handleQuantityChange = (productId: number, newQuantity: number) => {
