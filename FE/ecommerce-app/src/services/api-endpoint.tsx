@@ -3,7 +3,10 @@ export const API_AUTH_URL = {
     return "/auth/signin";
   },
   get REGISTER() {
-    return "/auth/resgister";
+    return "/auth/signup";
+  },
+  get LOGIN_GOOGLE() {
+    return "/auth/login-google";
   },
 };
 
@@ -43,7 +46,7 @@ export const API_PRODUCT_URL = {
   },
   GET_POPULAR_PRODUCT() {
     return `/product/popular`;
-  }
+  },
 };
 
 export const API_MEDIA_URL = {

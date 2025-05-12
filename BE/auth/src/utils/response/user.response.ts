@@ -14,6 +14,10 @@ export interface UserResponse {
   status: boolean;
 }
 
+
+ 
+
+
 export function mapUserResponse(user: UserResponse, token?: string) {
   const response = {
     id: user.id,

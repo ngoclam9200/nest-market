@@ -1,33 +1,37 @@
 import "./Login.scss";
 import LogoPage from "../../assets/images/banner-8.png";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { AuthService } from "../../services/auth/auth-service";
+import { isSuccess } from "../../services/base-response";
+import { useNavigate } from "react-router-dom";
+import Toast from "../../components/share/toast/Toast";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  const { fetch: login, response: loginResponse, loading: loginLoading } = AuthService.login();
   const handleSubmitLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setLoading(true);
     setError(null);
-
-    // try {
-    // Gọi hàm đăng nhập từ authService
-    //   const response = await login(email, password);
-    //   if (response.status == HttpStatusCode.Ok) {
-    //     setCookie("data_user", JSON.stringify(response.data));
-    //     setCookie("access_token", response.data.access_token);
-    //     navigate("/");
-    //   } else {
-    //     setError(response.message);
-    //   }
-    // } catch (err) {
-    //   setError("Login failed. Please check your credentials.");
-    // } finally {
-    //   setLoading(false);
-    // }
+    const data = {
+      email,
+      password,
+    };
+    login(data);
   };
+  useEffect(() => {
+    if (loginResponse) {
+      if (isSuccess(loginResponse)) {
+        Toast.ToastSuccess("Đăng nhập thành công!");
+        navigate("/home");
+      } else {
+        setError(loginResponse.message || "Đăng nhập thất bại. Vui lòng thử lại.");
+      }
+    }
+  }, [loginResponse]);
   return (
     <>
       <div className="page-content pt-150 pb-150">
@@ -42,17 +46,17 @@ const Login: React.FC = () => {
                   <div className="login_wrap widget-taber-content background-white">
                     <div className="padding_eight_all bg-white">
                       <div className="heading_s1">
-                        <h1 className="mb-5">Login</h1>
+                        <h1 className="mb-5">Đăng nhập</h1>
                         <p className="mb-30">
-                          Don't have an account? <a href="page-register.html">Create here</a>
+                          Bạn chưa có tài khoản? <a href="page-register.html">Tạo tài khoản tại đây</a>
                         </p>
                       </div>
                       <form onSubmit={handleSubmitLogin}>
                         <div className="form-group">
-                          <input type="text" name="email" placeholder="Username or Email *" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                          <input type="text" name="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
                         </div>
                         <div className="form-group">
-                          <input type="password" name="password" placeholder="Your password *" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                          <input type="password" name="password" placeholder="Mật khẩu" value={password} onChange={(e) => setPassword(e.target.value)} required />
                         </div>
 
                         <div className="login_footer form-group mb-50">
@@ -65,7 +69,7 @@ const Login: React.FC = () => {
                             </div>
                           </div>
                           <a className="text-muted" href="#">
-                            Forgot password?
+                            Quên mật khẩu?
                           </a>
                         </div>
                         <div className="form-group">
@@ -80,8 +84,8 @@ const Login: React.FC = () => {
                               {error}
                             </p>
                           )}
-                          <button type="submit" disabled={loading} className="  btn-heading btn-block  " name="login">
-                            {loading ? "Logging in..." : "Login"}
+                          <button type="submit" disabled={loginLoading} className="  btn-heading btn-block  " name="login">
+                            {loginLoading ? "Logging in..." : "Đăng nhập"}
                           </button>
                         </div>
                       </form>

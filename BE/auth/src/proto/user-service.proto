@@ -8,6 +8,7 @@ service UserServiceGrpc {
   rpc updateAccessToken (UpdateTokenRequest) returns (EmptyResponse);
   rpc checkValidateToken (TokenRequest) returns (UserResponse);
   rpc getUser (GetUserRequest) returns (UserResponse);
+  rpc checkEmailExists (EmailRequest) returns (IsExistsResponse);
 }
 
 message TokenRequest{
@@ -54,5 +55,16 @@ message UpdateTokenRequest{
   int32 id  = 1;
   string token = 2;
 }
+message IsExistsResponse {
+    int32 status=1;
+   string message=2;
+   User data = 3;
+}
+ 
+message EmailRequest{
+  string email=1;
+}
+ 
+
 
 message EmptyResponse {}

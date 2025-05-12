@@ -127,6 +127,16 @@ export class UsersController {
   }
 
   @PublicAPI()
+  @GrpcMethod('UserServiceGrpc', 'checkEmailExists')
+  async checkEmailExists(request: {email: string}): Promise<ApiResponse<boolean>> {
+    try {
+      return await this.usersService.checkEmailExists(request);
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @PublicAPI()
   @GrpcMethod('UserServiceGrpc', 'signup')
   async signup(
     @Body() userSignupDto: UserSignupDto,

@@ -21,7 +21,9 @@ import { lastValueFrom } from 'rxjs';
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+  ) {}
 
   @PublicAPI()
   @Post('signin')
@@ -46,6 +48,21 @@ export class AuthController {
   ): Promise<ApiResponse<UserResponse>> {
     try {
       return await this.authService.signup(userSignupDto);
+    } catch (error) {
+      throw new HttpException(
+        'Đã có lỗi xảy ra' + error,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @PublicAPI()
+  @Post('login-google')
+  async googleAuth(
+    @Body() body: { credential: string },
+  ): Promise<ApiResponse<UserResponse>> {
+    try {
+      return await this.authService.googleAuth(body.credential);
     } catch (error) {
       throw new HttpException(
         'Đã có lỗi xảy ra' + error,

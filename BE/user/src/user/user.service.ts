@@ -20,8 +20,7 @@ import {
 } from 'src/utils/interface/response.interface';
 import { UserSigninDto } from './dto/user-signin.dto';
 import { hash, compare } from 'bcrypt';
-import { Roles } from 'src/utils/common/user-roles.enum';
-import { BooleanNumberEnum } from 'src/utils/common/value.enum';
+
 import { UserSignupDto } from './dto/user-signup.dto';
 import { UpdateTokenDto } from './dto/update-token.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
@@ -95,6 +94,21 @@ export class UserService {
       return createResponse(HttpStatus.OK, 'OK', list_user);
     } catch (error) {
       return createResponse(HttpStatus.BAD_REQUEST, error, null);
+    }
+  }
+
+  async checkEmailExists(request: {
+    email: string;
+  }): Promise<ApiResponse<boolean>> {
+    console.log('🚀 ~ UserService ~ checkEmailExists ~ email:', request);
+    try {
+      const user = await this.usersRepository.findOne({
+        where: { email: request.email },
+      });
+      console.log("🚀 ~ UserService ~ user:", user)
+      return createResponse(HttpStatus.OK, 'OK', user);
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
     }
   }
 
