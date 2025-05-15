@@ -225,6 +225,39 @@ export class ProductService {
     }
   }
 
+  async getProductById(id: number): Promise<ApiResponse<ProductEntity>> {
+    try {
+      const product = await this.productRepository.findOne({
+        where: { id: id },
+      });
+
+      if (!product)
+        return createResponse(
+          HttpStatus.BAD_REQUEST,
+          'Sản phẩm không tồn tại',
+          null,
+        );
+      let list_media: ApiResponse<MediaResponse[]> = await lastValueFrom(
+        this.mediaServiceGrpc.getMediasByIds({
+          media_ids: product.list_media_id,
+        }),
+      );
+      if (list_media.status != HttpStatus.OK) {
+        throw new BadRequestException(list_media.message);
+      }
+      const category = await this.categoryRepository.findOne({
+        where: { id: product.category_id },
+      });
+      return createResponse(
+        HttpStatus.OK,
+        'OK',
+        mapProductResponseWithUser(product, list_media.data, category),
+      );
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+    }
+  }
+
   async createProduct(
     createProductDto: CreateProductDto,
     currentUser: UserResponse,
@@ -258,7 +291,6 @@ export class ProductService {
       product.stock = product.quantity;
 
       product = await this.productRepository.save(product);
-      console.log('🚀 ~ ProductService ~ product:', product);
       // let product_price =
       //   await this.productPriceRepository.create(createProductDto);
       // product_price.user_id_created = currentUser.id;
@@ -392,7 +424,6 @@ export class ProductService {
     count: number,
     currentUser: UserResponse,
   ): Promise<ApiResponse<ProductResponse[]>> {
-    console.log('🚀 ~ ProductService ~ count:', count);
     try {
       const products = await this.productRepository.find({
         where: { status: 1 }, // Only active products
@@ -509,6 +540,59 @@ export class ProductService {
       return createResponse(HttpStatus.OK, 'OK', mappedProducts);
     } catch (error) {
       throw new HttpException(error, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  //   async getProductsByIds(
+  //     product_ids: number[],
+  //   ): Promise<ApiResponse<ProductEntity[]>> {
+  //     try {
+  //       const find_product = product_ids.map(async (product_id) => {
+  //         const product = await this.productRepository.findOne({
+  //           where: { id: product_id },
+  //         });
+  //         console.log("🚀 ~ ProductService ~ constfind_product=product_ids.map ~ product:", product)
+  //         if (!product) {
+  //           return createResponse(
+  //             HttpStatus.BAD_REQUEST,
+  //             'Sản phẩm id ' + product_id + ' không tồn tại',
+  //           );
+  //         }
+  //         return product;
+  //       });
+  //       const list_product = await Promise.all(find_product);
+  //       console.log("🚀 ~ ProductService ~ list_product:", list_product)
+  //       return createResponse(HttpStatus.OK, 'OK', list_product);
+  //     } catch (error) {
+  //       return createResponse(HttpStatus.BAD_REQUEST, error, null);
+  //     }
+  //   }
+  // }
+  async getProductsByIds(
+    product_ids: number[],
+  ): Promise<ApiResponse<ProductEntity[]>> {
+    try {
+      const products = [];
+
+      for (const product_id of product_ids) {
+        const product = await this.productRepository.findOne({
+          where: { id: product_id },
+        });
+
+        if (!product) {
+          return createResponse(
+            HttpStatus.BAD_REQUEST,
+            'Sản phẩm id ' + product_id + ' không tồn tại',
+            null,
+          );
+        }
+
+        products.push(product);
+      }
+
+      return createResponse(HttpStatus.OK, 'OK', products);
+    } catch (error) {
+      return createResponse(HttpStatus.BAD_REQUEST, error, null);
     }
   }
 }

@@ -72,7 +72,6 @@ export class AuthService {
     try {
       // Decode the Google credential token (JWT)
       const decoded = jwt.decode(credential) as any;
-      console.log('🚀 ~ AuthService ~ googleAuth ~ decoded:', decoded);
 
       if (!decoded || !decoded.email) {
         throw new Error('Invalid Google credential');
@@ -88,7 +87,6 @@ export class AuthService {
       try {
         // Try to find user by email
         if (response.status == HttpStatus.OK) {
-          console.log('🚀 ~ AuthService ~ googleAuth ~ response:', response);
           if (response.data) {
             const accessToken = await this.accessToken(response.data);
             if (accessToken) {

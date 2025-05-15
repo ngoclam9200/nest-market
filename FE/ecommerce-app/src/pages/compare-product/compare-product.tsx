@@ -9,7 +9,6 @@ import { removeFromCompare } from "../../store/reducers/compare-reducer";
 
 const CompareProduct = () => {
   const { itemsCompare } = useAppSelector((state) => state.compare);
-  console.log("🚀 ~ CompareProduct ~ itemsCompare:", itemsCompare)
   const dispatch = useAppDispatch();
 
   const breadcrumb = [

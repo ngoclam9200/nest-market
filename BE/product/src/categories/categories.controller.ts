@@ -74,7 +74,6 @@ export class CategoriesController {
     @Query() findAllCategoryDTO: FindAllCategoryParentDTO,
     @CurrentUser() currentUser: UserResponse,
   ): Promise<ApiResponse<PaginatedResponse<CategoryResponse>>> {
-    console.log("🚀 ~ CategoriesController ~ currentUser:", currentUser)
     const { status } = findAllCategoryDTO;
     try {
       return await this.categoriesService.findAllCategoryParent(

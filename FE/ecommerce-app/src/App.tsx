@@ -16,6 +16,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { Provider } from "react-redux";
 import { persistor, store } from "./store/store";
 import { PersistGate } from "redux-persist/integration/react";
+import Checkout from "./pages/checkout/checkout";
 function App() {
   
   return (
@@ -34,6 +35,7 @@ function App() {
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/checkout" element={<Checkout />} />
                 <Route path="*" element={<NotFound />}></Route>
               </Routes>
             </Layout>

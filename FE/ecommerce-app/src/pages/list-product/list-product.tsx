@@ -68,7 +68,6 @@ const ListProduct = () => {
 
   useEffect(() => {
     if (categoryState) {
-      console.log("🚀 ~ useEffect ~ categoryState:", categoryState);
       setCurrentCategory(categoryState);
 
       setIsCallApiProduct(true);

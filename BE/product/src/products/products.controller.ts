@@ -29,6 +29,7 @@ import { DeleteProductDto } from './dto/delete-product.dto';
 import { ProductService } from './products.service';
 import { FindAllProductDTO } from './dto/find-all-product.dto';
 import { PublicAPI } from 'src/utils/decorators/authorize-roles.decorator';
+import { GrpcMethod } from '@nestjs/microservices';
 
 @Controller('product')
 @ApiTags('product')
@@ -98,6 +99,18 @@ export class ProductsController {
     }
   }
 
+  @PublicAPI()
+  @GrpcMethod('ProductServiceGrpc', 'getProduct')
+  async getUser(getUserRequest: {
+    id: number;
+  }): Promise<ApiResponse<ProductEntity>> {
+    try {
+      return await this.productsService.getProductById(+getUserRequest.id);
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+    }
+  }
+
   @Post('create')
   @UseGuards(AuthorizeGuard(['admin']))
   async createProduct(
@@ -150,5 +163,24 @@ export class ProductsController {
   @UseGuards(AuthorizeGuard(['admin']))
   async changeStatus(@Body('id') id: number, @Body('status') status: number) {
     return this.productsService.changeStatus(id, status);
+  }
+
+  @PublicAPI()
+  @GrpcMethod('ProductServiceGrpc', 'getProductsByIds')
+  async getUsersByIds(getProductByIdsRequest: {
+    product_ids: number[];
+  }): Promise<ApiResponse<ProductEntity[]>> {
+    try {
+      console.log(
+        '🚀 ~ ProductsController ~ product_ids:',
+        getProductByIdsRequest,
+      );
+
+      return await this.productsService.getProductsByIds(
+        getProductByIdsRequest.product_ids,
+      );
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+    }
   }
 }

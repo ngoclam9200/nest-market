@@ -56,7 +56,6 @@ const useApi = <T>(method: HttpMethod, showLoading: boolean, projectId?: string)
   const { setExpired } = useExpired();
   const finalToken =
     getBearerToken() ?? ""
-    // "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJhZG1pbiIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwicm9sZXMiOlsiYWRtaW4iXSwiaWF0IjoxNzQ1NDU5MjQyLCJleHAiOjE3NDgwNTEyNDJ9.GftmvMgvmGOzS500jl3Emsat3BdT0FdJ3JqiaDY252Q";
   const request = async ({ endPoint = "", data = {} }): Promise<BaseResponse<T> | void> => {
     if (showLoading) setIsLoading(true);
     setFetchState({ loading: true, error: null });

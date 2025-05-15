@@ -150,7 +150,6 @@ const Register = () => {
                       <div style={{ display: "none" }}>
                         <GoogleLogin
                           onSuccess={(credentialResponse: any) => {
-                            console.log(credentialResponse);
                             loginGoogle({ credential: credentialResponse.credential });
                             // Handle the Google login response here
                             // You can call your backend API to verify the token
@@ -158,7 +157,6 @@ const Register = () => {
                             setShowGoogleLogin(false);
                           }}
                           onError={() => {
-                            console.log("Login Failed");
                             Toast.ToastError("Đăng nhập Google thất bại");
                             setShowGoogleLogin(false);
                           }}

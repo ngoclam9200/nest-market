@@ -84,14 +84,25 @@ export class UserService {
 
   async getUsersByIds(user_ids: number[]): Promise<ApiResponse<UserEntity[]>> {
     try {
-      const find_user = user_ids.map(async (user_id) => {
+      const users = [];
+
+      for (const user_id of user_ids) {
         const user = await this.usersRepository.findOne({
           where: { id: user_id },
         });
-        return user;
-      });
-      const list_user = await Promise.all(find_user);
-      return createResponse(HttpStatus.OK, 'OK', list_user);
+
+        if (!user) {
+          return createResponse(
+            HttpStatus.BAD_REQUEST,
+            'Người dùng id ' + user_id + ' không tồn tại',
+            null,
+          );
+        }
+
+        users.push(user);
+      }
+
+      return createResponse(HttpStatus.OK, 'OK', users);
     } catch (error) {
       return createResponse(HttpStatus.BAD_REQUEST, error, null);
     }
@@ -100,12 +111,10 @@ export class UserService {
   async checkEmailExists(request: {
     email: string;
   }): Promise<ApiResponse<boolean>> {
-    console.log('🚀 ~ UserService ~ checkEmailExists ~ email:', request);
     try {
       const user = await this.usersRepository.findOne({
         where: { email: request.email },
       });
-      console.log("🚀 ~ UserService ~ user:", user)
       return createResponse(HttpStatus.OK, 'OK', user);
     } catch (error) {
       throw new HttpException(error, HttpStatus.BAD_REQUEST);

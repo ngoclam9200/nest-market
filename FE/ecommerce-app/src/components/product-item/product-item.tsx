@@ -25,7 +25,6 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
   const dispatch = useAppDispatch();
   const handleCompareClick = () => {
     // Check if product already exists in compare list
-    console.log("🚀 ~ handleCompareClick ~ itemsCompare:", itemsCompare);
       const isProductInCompare = itemsCompare.some((item) => item.product.id === product.id);
 
       if (!isProductInCompare) {

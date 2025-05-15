@@ -144,7 +144,6 @@
 //         type: SET_WAITING_CALL_API,
 //         payload: true,
 //       });
-//       console.log(code);
 
 //       const response = await getCategoryWithCode(code);
 

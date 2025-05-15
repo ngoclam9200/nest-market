@@ -5,6 +5,7 @@ import { AuthService } from "../../services/auth/auth-service";
 import { isSuccess } from "../../services/base-response";
 import { useNavigate } from "react-router-dom";
 import Toast from "../../components/share/toast/Toast";
+import { setCookie } from "../../services/cookie";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState<string>("");
@@ -26,6 +27,8 @@ const Login: React.FC = () => {
     if (loginResponse) {
       if (isSuccess(loginResponse)) {
         Toast.ToastSuccess("Đăng nhập thành công!");
+        setCookie("data_user", JSON.stringify(loginResponse.data));
+        setCookie("access_token", loginResponse.data.access_token);
         navigate("/home");
       } else {
         setError(loginResponse.message || "Đăng nhập thất bại. Vui lòng thử lại.");

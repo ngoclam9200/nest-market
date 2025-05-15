@@ -4,7 +4,7 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { BadRequestException, HttpStatus, ValidationError, ValidationPipe } from '@nestjs/common';
 import { createResponse } from './utils/response/response.util';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-
+import { join } from 'path';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
   app.useGlobalPipes(
@@ -20,6 +20,18 @@ async function bootstrap() {
     }
     ),
   );
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.GRPC,
+    options: {
+      package: 'grpc.product.service',
+      url: '0.0.0.0:3000',
+      protoPath: [join(__dirname, '..', 'proto', 'product-service.proto')],
+      loader: {
+        keepCase: true,
+      },
+    },
+  });
+
   
 
   app.setGlobalPrefix('api/v1')
@@ -36,19 +48,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs/api', app, document);
   
-  // app.connectMicroservice<MicroserviceOptions>({
-  //   transport: Transport.GRPC,
-  //   options: {
-  //     package: 'grpc.user.service',
-  //     url:'0.0.0.0:1000',
-  //     protoPath:[
-  //       join(__dirname, '..', 'proto', 'user-service.proto'),
-  //     ], 
-  //     loader:{
-  //       keepCase:true
-  //     }  
-  //   },
-  // });
+  
   await app.startAllMicroservices();
   await app.listen(4203);
 }

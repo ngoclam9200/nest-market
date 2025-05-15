@@ -49,6 +49,20 @@ export const API_PRODUCT_URL = {
   },
 };
 
+export const API_USER_ADDRESS_URL = {
+  get GET_LIST_ADDRESS() {
+    return `/address-user`;
+  },
+
+  get GET_ADDRESS_DEFAULT() {
+    return `/address-user/default`;
+  },
+
+  CHANGE_ADDRESS_DEFAULT() {
+    return `/address-user/change-default`;
+  },
+};
+
 export const API_MEDIA_URL = {
   get UPLOAD_MEDIA() {
     return "/media/upload";

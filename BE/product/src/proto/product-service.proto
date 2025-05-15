@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package grpc.product.service;
+
+service ProductServiceGrpc {
+  rpc getProduct (GetProductRequest) returns (ProductResponse);
+  rpc getProductsByIds (GetProductsByIdsRequest) returns (ProductResponse);
+}
+
+ 
+message GetProductRequest{
+  int32 id=1;
+}
+
+message ProductResponse {
+   int32 status=1;
+   string message=2;
+   Product data = 3;
+   
+}
+
+message Product {
+    int32 id  = 1;
+    string name = 2;
+    string description=3;
+    string created_at =4 ;
+    string updated_at = 5;
+    int32 status = 6;
+    int32 rating = 7;
+    User user_created= 8 ;
+    User user_updated = 9 ;
+}
+
+message User {
+    int32 id  = 1;
+    string email = 2;
+    string username=3;
+    string phone=4 ;
+    string avatar =5 ;
+    int32 gender  = 6;
+    string created_at =7;
+    string updated_at = 8;
+    bool status = 9;
+    repeated string roles = 10;
+   
+  }
+ 
+  message GetProductsByIdsRequest {
+    repeated int32 product_ids = 1;
+  }
+ 
+message EmptyResponse {}

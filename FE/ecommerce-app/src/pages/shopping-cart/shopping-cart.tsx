@@ -6,17 +6,16 @@ import { useAppDispatch, useAppSelector } from "../../store/store";
 import { useEffect, useState } from "react";
 import { CartItem, updateQuantity } from "../../store/reducers/cart-reducer";
 import { removeFromCart } from "../../store/reducers/cart-reducer"; // Assuming these actions exist
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { formatCurrencyDecimal } from "../../utils/helpers";
 import { domainMedia } from "../../enums/Enum";
 
 const Cart = () => {
   const { itemsCart, totalPriceCart } = useAppSelector((state) => state.cart);
-  console.log("🚀 ~ Cart ~ itemsCart:", itemsCart);
   const dispatch = useAppDispatch();
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
   const [selectAll, setSelectAll] = useState(false);
-
+  const navigate = useNavigate();
   // Handle quantity change
   const handleQuantityChange = (productId: number, newQuantity: number) => {
     dispatch(updateQuantity({ productId, quantity: newQuantity }));
@@ -69,6 +68,19 @@ const Cart = () => {
         ?.filter((item) => selectedItems.includes(item.product.id))
         .reduce((total, item) => total + item.product.price * (1 - item.product.discount / 100) * item.quantity, 0)
     );
+  };
+
+  const proceedToCheckout = () => {
+
+    // Navigate to checkout page with state
+    navigate("/checkout", {
+      state: {
+        cartItems: itemsCart?.filter((item) => selectedItems.includes(item.product.id)),
+        cartTotal: itemsCart
+          ?.filter((item) => selectedItems.includes(item.product.id))
+          .reduce((total, item) => total + item.product.price * (1 - item.product.discount / 100) * item.quantity, 0),
+      },
+    });
   };
 
   return (
@@ -133,7 +145,11 @@ const Cart = () => {
                         </td>
                         <td className="image product-thumbnail   text-center">
                           <div className="flex gap-2 items-center">
-                            <img src={item.product.media && item.product.media.length > 0 ? domainMedia + item.product.media[0].url : ""} alt={item.product.name} />
+                            <img
+                              style={{ width: "50px", height: "50px" }}
+                              src={item.product.media && item.product.media.length > 0 ? domainMedia + item.product.media[0].url : ""}
+                              alt={item.product.name}
+                            />
                             <div className="flex-col flex ">
                               <h6 className="mb-5">
                                 <Link className="product-name mb-10 text-heading" to={`/product/${item.product.id}`}>
@@ -198,17 +214,10 @@ const Cart = () => {
                         <h6 className="text-muted">Phí vận chuyển </h6>
                       </td>
                       <td style={{ verticalAlign: "middle" }} className="cart_total_amount">
-                        <h5 className="text-heading text-end">freeship </h5>
+                        <h5 className="text-heading text-end">0 </h5>
                       </td>
                     </tr>
-                    {/* <tr>
-                      <td className="cart_total_label">
-                        <h6 className="text-muted">Estimate for</h6>
-                      </td>
-                      <td className="cart_total_amount">
-                        <h5 className="text-heading text-end">Vietnam</h5>
-                      </td>
-                    </tr> */}
+
                     <tr>
                       <td scope="col" colSpan={2}>
                         <div className="divider-2 mt-10 mb-10"></div>
@@ -219,14 +228,22 @@ const Cart = () => {
                         <h6 className="text-muted">Tổng tiền</h6>
                       </td>
                       <td className="cart_total_amount">
-                        <h4 className="text-brand text-end">{calculateSelectedSubtotal()}</h4></td>
+                        <h4 className="text-brand text-end">{calculateSelectedSubtotal()}</h4>
+                      </td>
                     </tr>
                   </tbody>
                 </table>
               </div>
-              <Link to="/checkout" className="btn mb-20 w-100">
-                Thanh toán<i className="fi-rs-sign-out ml-15"></i>
-              </Link>
+
+              {selectedItems.length === 0 ? (
+                <button className="btn btn-disabled w-100 cursor-not-allowed">
+                  Thanh toán<i className="fi-rs-sign-out ml-15"></i>
+                </button>
+              ) : (
+                <button onClick={proceedToCheckout} className="btn mb-20 w-100">
+                  Thanh toán<i className="fi-rs-sign-out ml-15"></i>
+                </button>
+              )}
             </div>
           </div>
         </div>
