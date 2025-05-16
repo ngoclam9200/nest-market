@@ -41,6 +41,9 @@ import { MediaResponse } from 'src/utils/response/media.response';
 import { MediaServiceGrpcClient } from 'src/utils/interface/media-service.interface';
 import { ProductPriceEntity } from './entities/product-price.entity';
 import { CategoryEntity } from 'src/categories/entities/category.entity';
+import {
+  mapCateGoryResponseWithUser,
+} from 'src/utils/response/category.response';
 
 @Injectable()
 export class ProductService {
@@ -124,6 +127,10 @@ export class ProductService {
           const category = await this.categoryRepository.findOne({
             where: { id: product.category_id },
           });
+          const mediaCategory = await lastValueFrom(
+            this.mediaServiceGrpc.getMedia({ media_id: category.media_id }),
+          );
+
           if (currentUser && currentUser.roles.includes(Roles.ADMIN)) {
             let user_created_and_updated: ApiResponse<UserResponse[]> =
               await lastValueFrom(
@@ -143,13 +150,13 @@ export class ProductService {
               user_created,
               user_updated,
               list_media.data,
-              category,
+              mapCateGoryResponseWithUser(category, mediaCategory.data),
             );
           } else {
             return mapProductResponseWithUser(
               product,
               list_media.data,
-              category,
+              mapCateGoryResponseWithUser(category, mediaCategory.data),
             );
           }
         }),
@@ -188,6 +195,9 @@ export class ProductService {
       const category = await this.categoryRepository.findOne({
         where: { id: product.category_id },
       });
+      const mediaCategory = await lastValueFrom(
+        this.mediaServiceGrpc.getMedia({ media_id: category.media_id }),
+      );
       if (currentUser && currentUser.roles.includes(Roles.ADMIN)) {
         let user_created_and_updated: ApiResponse<UserResponse[]> =
           await lastValueFrom(
@@ -210,7 +220,7 @@ export class ProductService {
             user_created,
             user_updated,
             list_media.data,
-            category,
+            mapCateGoryResponseWithUser(category, mediaCategory.data),
           ),
         );
       } else {
@@ -248,10 +258,17 @@ export class ProductService {
       const category = await this.categoryRepository.findOne({
         where: { id: product.category_id },
       });
+      const mediaCategory = await lastValueFrom(
+        this.mediaServiceGrpc.getMedia({ media_id: category.media_id }),
+      );
       return createResponse(
         HttpStatus.OK,
         'OK',
-        mapProductResponseWithUser(product, list_media.data, category),
+        mapProductResponseWithUser(
+          product,
+          list_media.data,
+          mapCateGoryResponseWithUser(category, mediaCategory.data),
+        ),
       );
     } catch (error) {
       throw new HttpException(error, HttpStatus.BAD_REQUEST);
@@ -301,6 +318,9 @@ export class ProductService {
       const category = await this.categoryRepository.findOne({
         where: { id: product.category_id },
       });
+      const mediaCategory = await lastValueFrom(
+        this.mediaServiceGrpc.getMedia({ media_id: category.media_id }),
+      );
       return createResponse(
         HttpStatus.OK,
         'OK',
@@ -309,7 +329,7 @@ export class ProductService {
           currentUser,
           currentUser,
           list_media.data,
-          category,
+          mapCateGoryResponseWithUser(category, mediaCategory.data),
         ),
       );
     } catch (error) {
@@ -344,6 +364,9 @@ export class ProductService {
       const category = await this.categoryRepository.findOne({
         where: { id: product.category_id },
       });
+      const mediaCategory = await lastValueFrom(
+        this.mediaServiceGrpc.getMedia({ media_id: category.media_id }),
+      );
       return createResponse(
         HttpStatus.OK,
         'OK',
@@ -352,7 +375,7 @@ export class ProductService {
           user_created.data,
           currentUser,
           list_media.data,
-          category,
+          mapCateGoryResponseWithUser(category, mediaCategory.data),
         ),
       );
     } catch (error) {
@@ -407,6 +430,9 @@ export class ProductService {
     const category = await this.categoryRepository.findOne({
       where: { id: product.category_id },
     });
+    const mediaCategory = await lastValueFrom(
+      this.mediaServiceGrpc.getMedia({ media_id: category.media_id }),
+    );
     return createResponse(
       HttpStatus.OK,
       'OK',
@@ -415,7 +441,7 @@ export class ProductService {
         user_created.data,
         user_updated.data,
         list_media.data,
-        category,
+        mapCateGoryResponseWithUser(category, mediaCategory.data),
       ),
     );
   }
@@ -445,6 +471,10 @@ export class ProductService {
             where: { id: product.category_id },
           });
 
+          const mediaCategory = await lastValueFrom(
+            this.mediaServiceGrpc.getMedia({ media_id: category.media_id }),
+          );
+
           if (currentUser && currentUser.roles.includes(Roles.ADMIN)) {
             let user_created_and_updated: ApiResponse<UserResponse[]> =
               await lastValueFrom(
@@ -464,13 +494,13 @@ export class ProductService {
               user_created,
               user_updated,
               list_media.data,
-              category,
+              mapCateGoryResponseWithUser(category, mediaCategory.data),
             );
           } else {
             return mapProductResponseWithUser(
               product,
               list_media.data,
-              category,
+              mapCateGoryResponseWithUser(category, mediaCategory.data),
             );
           }
         }),
@@ -505,6 +535,9 @@ export class ProductService {
           const category = await this.categoryRepository.findOne({
             where: { id: product.category_id },
           });
+          const mediaCategory = await lastValueFrom(
+            this.mediaServiceGrpc.getMedia({ media_id: category.media_id }),
+          );
 
           if (currentUser && currentUser.roles.includes(Roles.ADMIN)) {
             let user_created_and_updated: ApiResponse<UserResponse[]> =
@@ -525,13 +558,13 @@ export class ProductService {
               user_created,
               user_updated,
               list_media.data,
-              category,
+              mapCateGoryResponseWithUser(category, mediaCategory.data),
             );
           } else {
             return mapProductResponseWithUser(
               product,
               list_media.data,
-              category,
+              mapCateGoryResponseWithUser(category, mediaCategory.data),
             );
           }
         }),
@@ -543,31 +576,6 @@ export class ProductService {
     }
   }
 
-  //   async getProductsByIds(
-  //     product_ids: number[],
-  //   ): Promise<ApiResponse<ProductEntity[]>> {
-  //     try {
-  //       const find_product = product_ids.map(async (product_id) => {
-  //         const product = await this.productRepository.findOne({
-  //           where: { id: product_id },
-  //         });
-  //         console.log("🚀 ~ ProductService ~ constfind_product=product_ids.map ~ product:", product)
-  //         if (!product) {
-  //           return createResponse(
-  //             HttpStatus.BAD_REQUEST,
-  //             'Sản phẩm id ' + product_id + ' không tồn tại',
-  //           );
-  //         }
-  //         return product;
-  //       });
-  //       const list_product = await Promise.all(find_product);
-  //       console.log("🚀 ~ ProductService ~ list_product:", list_product)
-  //       return createResponse(HttpStatus.OK, 'OK', list_product);
-  //     } catch (error) {
-  //       return createResponse(HttpStatus.BAD_REQUEST, error, null);
-  //     }
-  //   }
-  // }
   async getProductsByIds(
     product_ids: number[],
   ): Promise<ApiResponse<ProductEntity[]>> {
@@ -575,24 +583,61 @@ export class ProductService {
       const products = [];
 
       for (const product_id of product_ids) {
-        const product = await this.productRepository.findOne({
+        const find_product = await this.productRepository.findOne({
           where: { id: product_id },
         });
-
-        if (!product) {
+        if (!find_product) {
           return createResponse(
             HttpStatus.BAD_REQUEST,
             'Sản phẩm id ' + product_id + ' không tồn tại',
             null,
           );
         }
+        let list_media: ApiResponse<MediaResponse[]> = await lastValueFrom(
+          this.mediaServiceGrpc.getMediasByIds({
+            media_ids: find_product.list_media_id,
+          }),
+        );
+        if (list_media.status != HttpStatus.OK) {
+          throw new BadRequestException(list_media.message);
+        }
+        const category = await this.categoryRepository.findOne({
+          where: { id: find_product.category_id },
+        });
+        const mediaCategory = await lastValueFrom(
+          this.mediaServiceGrpc.getMedia({ media_id: category.media_id }),
+        );
 
-        products.push(product);
+        const mappedProducts = mapProductResponseWithUser(
+          find_product,
+          list_media.data,
+          mapCateGoryResponseWithUser(category, mediaCategory.data),
+        );
+        products.push(mappedProducts);
       }
 
       return createResponse(HttpStatus.OK, 'OK', products);
     } catch (error) {
       return createResponse(HttpStatus.BAD_REQUEST, error, null);
     }
+  }
+
+  async updateStockProduct(
+    order_product_items: { product_id: number; quantity: number }[],
+    increase: number,
+  ) {
+    try {
+      order_product_items.map(async (item) => {
+        const product = await this.productRepository.findOne({
+          where: { id: item.product_id },
+        });
+        if (increase) {
+          product.stock += item.quantity;
+        } else {
+          product.stock -= item.quantity;
+        }
+        await this.productRepository.save(product);
+      });
+    } catch (error) {}
   }
 }

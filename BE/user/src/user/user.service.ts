@@ -214,10 +214,11 @@ export class UserService {
 
   async checkValidateToken(TokenRequest: { token: string; id: number }) {
     try {
-      const user = await this.usersRepository.findOne({
+      const find_user = await this.usersRepository.findOne({
         where: { id: TokenRequest.id, access_token: TokenRequest.token },
       });
-      return await createResponse(HttpStatus.OK, 'Token User', user);
+      const mapUser = mapUserResponse(find_user);
+      return await createResponse(HttpStatus.OK, 'Token User', mapUser);
     } catch (error) {
       return createResponse(HttpStatus.BAD_REQUEST, error, null);
     }

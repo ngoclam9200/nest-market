@@ -1,6 +1,7 @@
 import { UserResponse } from './user.response';
 import { CategoryEntity } from 'src/categories/entities/category.entity';
 import { MediaResponse } from './media.response';
+import { formatDateTime } from '../common/date-time-format';
 
 export class CategoryResponse {
   id: number = 0;
@@ -29,8 +30,8 @@ export function mapCateGoryResponseWithUser(
     name: category.name,
     description: category.description,
     media_id: category.media_id,
-    created_at: category.created_at,
-    updated_at: category.updated_at,
+    created_at: formatDateTime(category.created_at),
+    updated_at: formatDateTime(category.updated_at),
     parent_id: category.parent_id,
     code: category.code,
     media: {
@@ -54,8 +55,8 @@ export function mapCateGoryResponseWithAdmin(
     name: category.name,
     description: category.description,
     media_id: category.media_id,
-    created_at: category.created_at,
-    updated_at: category.updated_at,
+    created_at: formatDateTime(category.created_at),
+    updated_at: formatDateTime(category.updated_at),
     parent_id: category.parent_id,
     parent: categoryParent,
     user_created: user_created,

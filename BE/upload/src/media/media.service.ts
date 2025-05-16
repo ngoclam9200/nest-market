@@ -12,7 +12,10 @@ import { ClientGrpc } from '@nestjs/microservices';
 import { UserServiceGrpcClient } from 'src/utils/interface/user-service.interface';
 import { CreateMediaDto } from './dto/create-media.dto';
 import { ApiResponse } from 'src/utils/interface/response.interface';
-import { MediaProductResponse } from 'src/utils/response/media.response';
+import {
+  mapMediaResponse,
+  MediaProductResponse,
+} from 'src/utils/response/media.response';
 import { Repository } from 'typeorm';
 import { MediaEntity } from './entities/media.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -38,7 +41,7 @@ export class MediaService {
     currentUser: UserResponse,
   ): Promise<ApiResponse<MediaProductResponse[]>> {
     try {
-      const responses: MediaEntity[] = [];
+      const responses: MediaProductResponse[] = [];
       for (const file of files) {
         let data = {
           type: createMediaDto.type,
@@ -48,7 +51,8 @@ export class MediaService {
         };
         let media = await this.mediaRepository.create(data);
         media = await this.mediaRepository.save(media);
-        responses.push(media);
+        const mapMedia = mapMediaResponse(media);
+        responses.push(mapMedia);
       }
 
       return createResponse(HttpStatus.OK, 'OK', responses);
@@ -57,7 +61,7 @@ export class MediaService {
     }
   }
 
-  async getMedia(media_id: number): Promise<ApiResponse<MediaEntity>> {
+  async getMedia(media_id: number): Promise<ApiResponse<MediaProductResponse>> {
     try {
       const media = await this.mediaRepository.findOne({
         where: { id: media_id },
@@ -72,7 +76,8 @@ export class MediaService {
       if (!media) {
         throw new Error(`Media_id=${media_id} không tồn tại`);
       }
-      return createResponse(HttpStatus.OK, 'OK', media);
+      const mapMedia = mapMediaResponse(media);
+      return createResponse(HttpStatus.OK, 'OK', mapMedia);
     } catch (error) {
       return createResponse(HttpStatus.BAD_REQUEST, error, null);
     }
@@ -90,7 +95,7 @@ export class MediaService {
           if (!media) {
             return {};
           }
-          return media;
+          return mapMediaResponse(media);
         }),
       );
       return createResponse(HttpStatus.OK, 'OK', find_media);

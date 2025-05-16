@@ -11,6 +11,4 @@ export class UserResponse {
   created_at: string;
   updated_at: string;
   status: boolean;
-
-  
 }

@@ -110,7 +110,7 @@ export class CategoriesController {
   async findOneCategory(
     @Param('id') id: number,
     @CurrentUser() currentUser: UserResponse,
-  ): Promise<ApiResponse<CategoryEntity>> {
+  ): Promise<ApiResponse<CategoryResponse>> {
     try {
       return await this.categoriesService.findOneCategory(+id, currentUser);
     } catch (error) {
@@ -123,7 +123,7 @@ export class CategoriesController {
   async findCategoryWithCode(
     @Param('code') code: string,
     @CurrentUser() currentUser: UserResponse,
-  ): Promise<ApiResponse<CategoryEntity>> {
+  ): Promise<ApiResponse<CategoryResponse>> {
     try {
       return await this.categoriesService.findCategoryWithCode(
         code,

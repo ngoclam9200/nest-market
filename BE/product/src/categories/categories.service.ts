@@ -129,7 +129,6 @@ export class CategoriesService {
     currentUser: UserResponse,
   ): Promise<ApiResponse<PaginatedResponse<CategoryResponse>>> {
     try {
-
       const get_all: any = {};
       if (parent_id == GetTypeEnum.ALL) {
         get_all.parent_id = Not(IsNull());
@@ -181,7 +180,7 @@ export class CategoriesService {
                 where: { id: cate.parent_id },
               })
             : null;
-          if ( currentUser && currentUser.roles.includes(Roles.ADMIN)) {
+          if (currentUser && currentUser.roles.includes(Roles.ADMIN)) {
             return mapCateGoryResponseWithAdmin(
               exsistParentCategory,
               cate,
@@ -202,7 +201,7 @@ export class CategoriesService {
   async findOneCategory(
     id: number,
     currentUser: UserResponse,
-  ): Promise<ApiResponse<CategoryEntity>> {
+  ): Promise<ApiResponse<CategoryResponse>> {
     try {
       const category = await this.categoryRepository.findOne({
         where: { id: id },
@@ -336,7 +335,7 @@ export class CategoriesService {
   async findCategoryWithCode(
     code: string,
     currentUser: UserResponse,
-  ): Promise<ApiResponse<CategoryEntity>> {
+  ): Promise<ApiResponse<CategoryResponse>> {
     try {
       const category = await this.categoryRepository.findOne({
         where: { code: code },

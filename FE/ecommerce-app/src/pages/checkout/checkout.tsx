@@ -20,7 +20,6 @@ const Checkout = () => {
     navigate("/");
   }
   const dataUser = JSON.parse(Cookies.get("data_user") || "");
-  console.log("🚀 ~ Checkout ~ dataUser:", dataUser);
   useEffect(() => {
     getUserAddressDefault();
   }, []);

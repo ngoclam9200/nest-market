@@ -1,6 +1,7 @@
 import { UserResponse } from './user.response';
 import { BannerEntity } from 'src/banner/entities/banner.entity';
 import { MediaResponse } from './media.response';
+import { formatDateTime } from '../common/date-time-format';
  
 
 export interface BannerResponse {
@@ -22,8 +23,8 @@ export function mapBannerResponse(banner: BannerEntity, media?: MediaResponse , 
     name: banner.name,
     description: banner.description,
     media_id: banner.media_id,
-    created_at: banner.created_at,
-    updated_at: banner.updated_at,
+    created_at: formatDateTime(banner.created_at),
+    updated_at: formatDateTime(banner.updated_at),
     title: banner.title,
     user_created: user_created,
     user_updated: user_updated,

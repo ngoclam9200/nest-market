@@ -171,13 +171,30 @@ export class ProductsController {
     product_ids: number[];
   }): Promise<ApiResponse<ProductEntity[]>> {
     try {
-      console.log(
-        '🚀 ~ ProductsController ~ product_ids:',
-        getProductByIdsRequest,
-      );
-
       return await this.productsService.getProductsByIds(
         getProductByIdsRequest.product_ids,
+      );
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @PublicAPI()
+  @GrpcMethod('ProductServiceGrpc', 'updateStockProduct')
+  async updateStockProduct(updateStockProductRequest: {
+    order_product_items: {
+      product_id: number;
+      quantity: number;
+    }[];
+    increase: number;
+  }) {
+    
+    try {
+     
+
+      return await this.productsService.updateStockProduct(
+        updateStockProductRequest.order_product_items,
+        updateStockProductRequest.increase,
       );
     } catch (error) {
       throw new HttpException(error, HttpStatus.BAD_REQUEST);

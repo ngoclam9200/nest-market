@@ -26,10 +26,10 @@ import { extname } from 'path';
 import { CreateMediaDto } from './dto/create-media.dto';
 import { ApiResponse } from 'src/utils/interface/response.interface';
 import { MediaProductResponse } from 'src/utils/response/media.response';
-import * as moment from 'moment';
+import moment from 'moment';
 import { PublicAPI } from 'src/utils/decorators/authorize-roles.decorator';
 import { GrpcMethod } from '@nestjs/microservices';
-import { MediaEntity } from './entities/media.entity';
+ 
 
 @Controller('media')
 @ApiTags('media')
@@ -73,7 +73,7 @@ export class MediaController {
   @GrpcMethod('MediaServiceGrpc', 'getMedia')
   async getUser(getUserRequest: {
     media_id: number;
-  }): Promise<ApiResponse<MediaEntity>> {
+  }): Promise<ApiResponse<MediaProductResponse>> {
     try {
       return await this.mediaService.getMedia(+getUserRequest.media_id);
     } catch (error) {
@@ -85,7 +85,7 @@ export class MediaController {
   @GrpcMethod('MediaServiceGrpc', 'getMediasByIds')
   async getMediasByIds(getMediasByIdsRequest: {
     media_ids: number[];
-  }): Promise<ApiResponse<MediaEntity[]>> {
+  }): Promise<ApiResponse<MediaProductResponse[]>> {
     try {
       return await this.mediaService.getMediasByIds(
         getMediasByIdsRequest.media_ids,
