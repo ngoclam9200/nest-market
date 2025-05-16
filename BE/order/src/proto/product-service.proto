@@ -1,0 +1,105 @@
+syntax = "proto3";
+
+package grpc.product.service;
+
+service ProductServiceGrpc {
+  rpc getProduct (GetProductRequest) returns (ProductResponse);
+  rpc getProductsByIds (GetProductsByIdsRequest) returns (ProductsByIdsResponse);
+  rpc updateStockProduct (UpdateCountProductRequest) returns (EmptyResponse);
+}
+
+ 
+message GetProductRequest{
+  int32 id=1;
+}
+
+message OrderProductItem{
+  int32 product_id=1;
+  int32 quantity=2;
+}
+
+message UpdateCountProductRequest{
+  repeated OrderProductItem order_product_items=1;
+  int32 increase=3;
+}
+
+message ProductResponse {
+   int32 status=1;
+   string message=2;
+   Product data = 3;
+}
+
+message ProductsByIdsResponse {
+  int32 status=1;
+  string message=2;
+  repeated Product data = 3;
+  
+}
+
+message Product {
+  int32 id  = 1;
+  string name = 2;
+  int32 price = 3;
+  string unit = 4;
+  int32 quantity = 5;
+  int32 stock = 6;
+  int32 discount = 7;
+  string description = 8;
+  string created_at = 9;
+  string updated_at = 10;
+  bool status = 11;
+  int32 rating = 12;
+  User user_created= 13 ;
+  User user_updated = 14 ;
+  repeated Media media = 15;
+  Category category = 16;
+  string brand = 17;
+  string origin = 18;
+  string expiry_date = 19;
+  string storage_instructions = 20;
+  Media media_default = 21;
+}
+
+message Media {
+  int32 id  = 1;
+  string url = 2;
+  int32 size=3;
+  int32 type  = 4;
+  string created_at =5 ;
+  bool status =6;
+  string name = 7;
+}
+
+message Category {
+  int32 id  = 1;
+  string name = 2;
+  string description = 3;
+  int32 media_id = 4;
+  string created_at = 5;
+  string updated_at = 6;
+  User user_created = 7;
+  int32 parent_id = 8;
+  string code = 9;
+  int32 status = 10;
+
+}
+
+message User {
+    int32 id  = 1;
+    string email = 2;
+    string username=3;
+    string phone=4 ;
+    string avatar =5 ;
+    int32 gender  = 6;
+    string created_at =7;
+    string updated_at = 8;
+    bool status = 9;
+    repeated string roles = 10;
+   
+  }
+
+  message GetProductsByIdsRequest {
+    repeated int32 product_ids = 1;
+  }
+ 
+message EmptyResponse {}
